@@ -83,13 +83,8 @@ StickMan.prototype.render = function(ctx, key, elapsed) {
 	var frame = linearMix(frames[frame1], frames[frame2],
 			partialElapsed/durationPerFrame);
 
-	ctx.strokeStyle = "blue";
-	ctx.lineWidth = 1;
-	ctx.lineCap = "round";
 
-	ctx.translate(width*elapsed/duration, 0);
 
-	ctx.beginPath();
 	var moveTo = function(i) {
 		ctx.moveTo(frame[2*i], frame[2*i+1]);
 	}
@@ -97,6 +92,24 @@ StickMan.prototype.render = function(ctx, key, elapsed) {
 		ctx.lineTo(frame[2*i], frame[2*i+1]);
 	}
 
+	ctx.lineWidth = 2;
+	ctx.lineCap = "round";
+	ctx.translate(width*elapsed/duration, 0);
+
+	ctx.strokeStyle = "#222299";
+  ctx.beginPath();
+	moveTo(0);  // A
+	lineTo(5);  // Elbow 2
+	lineTo(6);  // hand 2
+
+	moveTo(7); // B
+	lineTo(11); // Knee2
+	lineTo(12); // Foot2 start
+	lineTo(13); // Foot2 end
+	ctx.stroke();
+
+	ctx.strokeStyle = "#4444bb";
+	ctx.beginPath();
 	moveTo(0); // A
 	lineTo(1); // HeadStart
 	var centerHead = [(frame[2]+frame[4])/2, (frame[3]+frame[5])/2];
@@ -104,25 +117,20 @@ StickMan.prototype.render = function(ctx, key, elapsed) {
 	var radiusHead = Math.hypot(frame0[2]-frame0[4], frame0[3]-frame0[5])/2;
 	ctx.arc(centerHead[0], centerHead[1], radiusHead, 0.5*Math.PI,  2.5* Math.PI, false);
 //	ctx.lineTo(frame[4], frame[5]);
+  moveTo(0);
+  lineTo(7); // B
+	ctx.stroke();
 
+	ctx.strokeStyle = "#6666dd";
+  ctx.beginPath();
 	moveTo(0);  // A
 	lineTo(3);  // Elbow
 	lineTo(4);  // Hand
 
-	moveTo(0);  // A
-	lineTo(5);  // Elbow 2
-	lineTo(6);  // hand 2
-
-	moveTo(0);
-	lineTo(7); // B
+	moveTo(7); // B
 	lineTo(8); // Knee1
 	lineTo(9); // Foot1 start
 	lineTo(10); // Foot1 end
-
-	moveTo(7); // B
-	lineTo(11); // Knee2
-	lineTo(12); // Foot2 start
-	lineTo(13); // Foot2 end
 
 	ctx.stroke();
 	ctx.restore();

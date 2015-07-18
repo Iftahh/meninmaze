@@ -12,9 +12,12 @@ var totalElapsed = 0;
 
 raf.start(function(elapsed) {
   // Clear the screen
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.save();
-  ctx.translate(160,200);
+  //ctx.scale(0.5, 0.8);
+  ctx.translate(160, 200);
   ctx.strokeStyle = "black";
   ctx.lineWidth = 3;
   ctx.beginPath()

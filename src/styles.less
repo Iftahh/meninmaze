@@ -1,6 +1,71 @@
+body {
+  background: #bbb;
+  text-shadow: 1px 1px 2px #222;
+  font-family: sans-serif;
+}
 #game {
   margin: 50px auto 0;
   display: block;
-  border: 3px solid #555;
+  border: 3px inset #ccc;
   border-radius: 3px;
+}
+
+#left {
+  position:fixed;
+  bottom: 10px;
+  left: 10px;
+}
+
+
+.button {
+  width: 80px;
+  height: 80px;
+  border-radius: 40px;
+  border: 2px outset rgba(125,125,125,0.6);
+  position: fixed;
+  line-height: 80px;
+  text-align:center;
+  vertical-align: middle;
+  font-size: 24px;
+  color: #fff;
+  cursor: pointer;
+  -webkit-user-select: none;
+}
+
+#left span {
+  background: rgba(55,55,55,0.9);
+  border: 2px outset rgba(125,125,125,0.6);
+  border-radius: 3px;
+  height: 100%;
+  display: inline-block;
+  margin: 1px;
+  text-align:center;
+  vertical-align: middle;
+  font-size: 24px;
+  color: #fff;
+  cursor: pointer;
+  -webkit-user-select: none;
+}
+
+#left div {
+  padding: 3px;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.w1 {
+  width: 55px;
+}
+.w2 {
+  width: 65px;
+}
+.h1 {
+  height: 55px;
+  line-height: 55px;
+}
+.h2 {
+  height: 65px;
+  line-height: 65px;
 }
