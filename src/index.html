@@ -9,13 +9,13 @@
   <body>
     <canvas id="game" width="800" height="600"></canvas>
     <div id="left">
-      <div class="h1"><span class="w1"></span><span class="w2">^</span><span class="w1"></span></div>
-      <div class="h2"><span class="w1">&lt;</span><span class="w2 hidden"></span><span class="w1">&gt;</span></div>
-      <div class="h1"><span class="w1"></span><span class="w2">V</span><span class="w1"></span></div>
+      <div class="h1"><span class="w1"></span><span class="w2" id="tb">^</span><span class="w1"></span></div>
+      <div class="h2"><span class="w1" id="lb">&lt;</span><span class="w2 hidden"></span><span class="w1" id="rb">&gt;</span></div>
+      <div class="h1"><span class="w1"></span><span class="w2" id="bb">V</span><span class="w1"></span></div>
     </div>
 
-    <div class="button" style="background:red; right: 100px; bottom: 25px;">Hit</div>
-    <div class="button" style="background:yellow; right: 25px; bottom: 100px;">Run</div>
+    <div class="button" style="background: linear-gradient(rgb(244, 24, 24), rgb(224, 20, 20), rgb(186, 17, 17)); right: 25px; bottom: 100px;">Hit</div>
+    <div class="button" style="background: linear-gradient(rgb(244, 244, 24), rgb(224, 224, 20), rgb(186, 186, 17)); right: 100px; bottom: 25px;">Block</div>
     <script src="build.js"></script>
   </body>
 </html>

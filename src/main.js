@@ -6,6 +6,8 @@ var stickman = require('./stickman');
 var canvas = document.querySelector('#game');
 var ctx = canvas.getContext('2d');
 
+var input = require('./input')
+
 var rand = rng();
 
 var totalElapsed = 0;
