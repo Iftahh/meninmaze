@@ -2,6 +2,7 @@ var raf = require('./raf');
 var rng = require('./rng');
 
 var stickman = require('./stickman');
+var KEYS = require('./input');
 
 var canvas = document.querySelector('#game');
 var ctx = canvas.getContext('2d');
@@ -11,6 +12,10 @@ var input = require('./input')
 var rand = rng();
 
 var totalElapsed = 0;
+
+var player = 0;
+var anim = stickman.animations.walk;
+var flip = false;
 
 raf.start(function(elapsed) {
   // Clear the screen
@@ -27,15 +32,37 @@ raf.start(function(elapsed) {
   ctx.lineTo(90,0)
   ctx.moveTo(180,0)
   ctx.lineTo(270,0)
-  ctx.stroke()
+  ctx.stroke();
 
-  // if ((totalElapsed % 5) > 2.5) {
-  // 	ctx.translate(300,0);
-  // }
-  stickman.render(ctx, 'walk', totalElapsed);
-  totalElapsed += elapsed;
-  if (totalElapsed > stickman.frames.walk.duration*4) {
+  var move = false;
+  if (KEYS[39]) {
+    move = true;
+    flip = false;
+    player += anim.getOffset(elapsed);
+  }
+  if (KEYS[37]) {
+    move = true;
+    flip = true;
+    player -= anim.getOffset(elapsed);
+  }
+
+  if (move) {
+    totalElapsed += elapsed;
+  }
+  else {
     totalElapsed = 0;
   }
+
+  if (anim) {
+    ctx.translate(player, 0);
+    if (flip) {
+      ctx.scale(-1,1);
+    }
+    // if ((totalElapsed % 5) > 2.5) {
+    // 	ctx.translate(300,0);
+    // }
+    anim.render(ctx, totalElapsed);
+  }
+
   ctx.restore();
 });

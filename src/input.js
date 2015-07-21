@@ -2,13 +2,16 @@ var codeToButtons = {
   40: document.getElementById('bb'),
   37: document.getElementById('lb'),
   39: document.getElementById('rb'),
-  38: document.getElementById('tb')
+  38: document.getElementById('tb'),
+  83: document.getElementById('hitb'),
+  65: document.getElementById('blockb'), // TODO: short ids to save space
 } ;
 
 var KEYS={}
 var updateFromKeys = function(e) {
   var code= e.keyCode;
     KEYS[code]=  e.type == "keydown";
+    console.log('code is ',code);
     // Player.left = KEYS[37];
     // Player.right = KEYS[39];
     // Player.up = KEYS[38];
@@ -22,7 +25,7 @@ var updateFromKeys = function(e) {
         codeToButtons[code].classList.remove('clicked');
       }
     }
-    if (e.keyCode == 32 || e.keyCode >=37 && e.keyCoe <= 40)
+    if (KEYS[code])  //  remove this line to save space, but it breaks ctrl+R refresh, alt-left back, etc...
         e.preventDefault();
 }
 
@@ -32,3 +35,5 @@ document.addEventListener('keyup', updateFromKeys)
 document.body.addEventListener('touchmove', function(event) {
     event.preventDefault();
 }, false);
+
+module.exports = KEYS;

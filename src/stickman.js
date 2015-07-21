@@ -26,8 +26,13 @@
  ******************************************************************************/
 
 function StickMan() {
-	this.frames = {};
+	this.animations = {};
 }
+
+StickMan.prototype.add = function(key, duration, width, frames) {
+	this.animations[key] = new StickAnimation(duration, width, frames);
+};
+
 
 function StickAnimation(duration, width, frames) {
   this.duration = duration;
@@ -50,10 +55,6 @@ function StickAnimation(duration, width, frames) {
 	}
 }
 
-StickMan.prototype.add = function(key, duration, width, frames) {
-	this.frames[key] = new StickAnimation(duration, width, frames);
-};
-
 
 function linearMix(frame1, frame2, fraction) {
 	var result = [];
@@ -64,8 +65,12 @@ function linearMix(frame1, frame2, fraction) {
 	return result;
 }
 
-StickMan.prototype.render = function(ctx, key, elapsed) {
-	var anim = this.frames[key];
+StickAnimation.prototype.getOffset = function(elapsed) {
+	return this.width*elapsed/this.duration;
+}
+
+StickAnimation.prototype.render = function(ctx, elapsed) {
+	var anim = this;
 	var duration = anim.duration;
 	var width = anim.width;
 	ctx.save();
@@ -84,7 +89,6 @@ StickMan.prototype.render = function(ctx, key, elapsed) {
 			partialElapsed/durationPerFrame);
 
 
-
 	var moveTo = function(i) {
 		ctx.moveTo(frame[2*i], frame[2*i+1]);
 	}
@@ -94,7 +98,6 @@ StickMan.prototype.render = function(ctx, key, elapsed) {
 
 	ctx.lineWidth = 2;
 	ctx.lineCap = "round";
-	ctx.translate(width*elapsed/duration, 0);
 
 	ctx.strokeStyle = "#222299";
   ctx.beginPath();
@@ -134,26 +137,15 @@ StickMan.prototype.render = function(ctx, key, elapsed) {
 
 	ctx.stroke();
 	ctx.restore();
+
+
 };
 
 
 
 var sm = new StickMan();
-//
-//sm.add( 'walk', 142, 478,
-//  [
-//    [142,196,
-//     142,172,142,128,
-//     112,252,152,300,
-//     116,260,168,284,
-//     122,294,
-//     132,378, 120,474,162,478,
-//     156,376,84,432,104,458
-//     ],
-//  ]
-//);
 
-sm.add('walk', 2.4, 180,
+sm.add('walk', 2.4, 180, // 2.4 seconds 180px horizontal animation
 [ // 7 frames generated from walk.svg
 [  // frame 0
           4, -102  // A
