@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Maze Gen</title>
+
+    <style type="text/css">
+        #canvas-wrap {
+            text-align: center;
+        }
+        #properties {
+            padding:5px;
+            float:left;
+            background: #eee;
+        }
+        #properties input {
+            width: 45px;
+        }
+        #properties td {
+            text-align:right;
+        }
+        #debug-text {
+            width: 350px;
+            padding:5px;
+            margin: 10px;
+            border:1px solid #ddd;
+            white-space: pre;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div id="page-wrap">
+        <div id="properties">
+            <table>
+                <tbody>
+                <tr> <td></td><td>Seed: <input id="mazeSeed" type="number" value=123></td><td></td>
+                </tr>
+                <tr>
+                    <td>Size</td>
+                    <td>Width: <input id="mazeWidth" type="number" value=30> </td>
+                    <td>Height: <input id="mazeHeight" type="number" value=25></td>
+                </tr>
+                </tbody>
+            </table>
+            <div id="debug-text"></div>
+        </div>
+        <div id="canvas-wrap">
+            <canvas width="600" height="400" id="canvas"></canvas>
+        </div>
+
+    </div>
+
+</body>
+<script type="text/javascript" src="dfs_maze_gen_test.js"></script>
+</html>
