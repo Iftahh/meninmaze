@@ -1,3 +1,6 @@
+var rng = require('./rng');
+var jsfxr = require('./jsfxr');
+
 function ArcadeAudio() {
   this.sounds = {};
 }
@@ -20,7 +23,7 @@ ArcadeAudio.prototype.add = function( key, count, settings ) {
 
 ArcadeAudio.prototype.play = function( key ) {
   var sound = this.sounds[ key ];
-  var soundData = sound.length > 1 ? sound[ Math.floor( Math.random() * sound.length ) ] : sound[ 0 ];
+  var soundData = rng.pick(sound);
   soundData.pool[ soundData.tick ].play();
   soundData.tick < soundData.count - 1 ? soundData.tick++ : soundData.tick = 0;
 };

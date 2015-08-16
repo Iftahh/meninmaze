@@ -17,6 +17,10 @@
     "no-comma-dangle": 0,
     "no-use-before-define": [2, "nofunc"],
     // Strict mode
-    "strict": 0
+    "strict": 0,
+
+    // iftah
+    "no-multi-spaces": 0,
+    "space-infix-ops": 0 
   }
 }

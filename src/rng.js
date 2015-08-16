@@ -48,7 +48,7 @@ module.exports = function(seed) {
      * @api public
      */
     pick: function(source) {
-      return source[rng.range(0, source.length)];
+      return source[rng.int(source.length)];
     }
   };
 
@@ -81,4 +81,4 @@ module.exports = function(seed) {
 //     z = (170 * z) % 30323;
 //     return (x / 30269.0 + y / 30307.0 + z / 30323.0) % 1.0;
 //   };
-}
+// }

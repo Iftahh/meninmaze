@@ -11,6 +11,24 @@ body {
   border-radius: 3px;
 }
 
+#hitb {
+  background: radial-gradient(rgb(244, 44, 44), rgb(224, 30, 30), rgb(86, 17, 17));
+  right: 25px;
+  bottom: 100px;
+}
+#hitb.clicked {
+  background: radial-gradient(rgb(254, 84, 84), rgb(234, 50, 50), rgb(96, 37, 37));
+}
+
+#blockb {
+  background: radial-gradient(rgb(244, 244, 24), rgb(224, 224, 20), rgb(126, 126, 17));
+  right: 100px;
+  bottom: 25px;
+}
+#blockb.clicked {
+  background: radial-gradient(rgb(254, 254, 64), rgb(234, 234, 40), rgb(146, 146, 37));
+}
+
 #left {
   position:fixed;
   bottom: 10px;
@@ -22,7 +40,8 @@ body {
   width: 80px;
   height: 80px;
   border-radius: 40px;
-  border: 2px outset rgba(125,125,125,0.6);
+  //border: 2px outset rgba(125,125,125,0.6);
+  box-shadow: 3px 3px 6px rgba(0,0,0,0.5);
   position: fixed;
   line-height: 80px;
   text-align:center;
@@ -32,32 +51,31 @@ body {
   cursor: pointer;
   -webkit-user-select: none;
 }
-
-.button:hover {
-  border: 3px outset rgba(225,225,225,0.9);
-  font-weight: 900;
-  margin:0px;
-}
-
-#left span:hover {
-  border: 3px outset rgba(225,225,225,0.9);
-  font-weight: 900;
-  margin:0px;
-}
-
 .clicked {
-  border: 3px inset rgba(225,225,225,0.9) !important;
-  font-weight: 900;
-  margin:0px !important;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+  transform:translate(2px,2px);
+  font-weight: 700;
 }
 
+#left span:hover, #left span.clicked {
+  font-weight: 700;
+  background: linear-gradient(rgb(244, 244, 224), rgb(224, 224, 204), rgb(166, 166, 76));
+}
+//
+// .clicked {
+//   border: 3px inset rgba(225,225,225,0.9) !important;
+//   font-weight: 900;
+//   margin:0px !important;
+// }
+//
 #left span {
   /*background: rgba(55,55,55,0.9);*/
   border: 2px outset rgba(125,125,125,0.6);
   border-radius: 3px;
   height: 100%;
   display: inline-block;
-  background: linear-gradient(rgb(224, 224, 224), rgb(204, 204, 204), rgb(176, 176, 176));
+  background: linear-gradient(rgb(224, 224, 224), rgb(204, 204, 204), rgb(126, 126, 126));
+  box-shadow: 3px 3px 6px rgba(0,0,0,0.5);
   margin: 1px;
   text-align:center;
   vertical-align: middle;

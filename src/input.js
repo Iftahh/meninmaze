@@ -25,7 +25,7 @@ var updateFromKeys = function(e) {
         codeToButtons[code].classList.remove('clicked');
       }
     }
-    if (KEYS[code])  //  remove this line to save space, but it breaks ctrl+R refresh, alt-left back, etc...
+    if (codeToButtons[code])  //  remove this line to save space, but it breaks ctrl+R refresh, alt-left back, etc...
         e.preventDefault();
 }
 
