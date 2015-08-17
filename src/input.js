@@ -1,28 +1,23 @@
-var codeToButtons = {
-  40: document.getElementById('bb'),
-  37: document.getElementById('lb'),
-  39: document.getElementById('rb'),
-  38: document.getElementById('tb'),
-  83: document.getElementById('hitb'),
-  65: document.getElementById('blockb'), // TODO: short ids to save space
-} ;
+utils = require('./utils')
+
 
 var KEYS={}
 var updateFromKeys = function(e) {
   var code= e.keyCode;
-    KEYS[code]=  e.type == "keydown";
-    console.log('code is ',code);
+    KEYS[code]=  e.type == 'keydown';
+    //console.log('code is ',code);
     // Player.left = KEYS[37];
     // Player.right = KEYS[39];
     // Player.up = KEYS[38];
     // Player.down = KEYS[40];
     // Player.jump = KEYS[32];
-    if (codeToButtons[code]) {
+    var element = document.getElementById(code);
+    if (element) {
       if (KEYS[code]) {
-        codeToButtons[code].classList.add('clicked');
+        element.classList.add('clicked');
       }
       else {
-        codeToButtons[code].classList.remove('clicked');
+        element.classList.remove('clicked');
       }
     }
     if (codeToButtons[code])  //  remove this line to save space, but it breaks ctrl+R refresh, alt-left back, etc...
@@ -35,5 +30,17 @@ document.addEventListener('keyup', updateFromKeys)
 document.body.addEventListener('touchmove', function(event) {
     event.preventDefault();
 }, false);
+
+utils.each(document.querySelectorAll("#left span"), function(el) {
+  utils.each(['mousedown','mouseup', 'touchstart','touchmove','touchend'], function(evName) {
+    el.addEventListener(evName, function(event) {
+      var type = event.type;
+      console.log("event "+ type+ " "+event.target.id);
+      var e = {type: (type == 'mouseup' || type=='touchend')? 0: 'keydown', keyCode: event.target.id };
+      // fake a keydown/up event
+      updateFromKeys(e);
+    });
+  });
+});
 
 module.exports = KEYS;
