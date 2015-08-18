@@ -19,9 +19,8 @@ var updateFromKeys = function(e) {
       else {
         element.classList.remove('clicked');
       }
+      e.preventDefault();
     }
-    if (codeToButtons[code])  //  remove this line to save space, but it breaks ctrl+R refresh, alt-left back, etc...
-        e.preventDefault();
 }
 
 document.addEventListener('keydown', updateFromKeys)

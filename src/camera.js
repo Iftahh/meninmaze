@@ -12,6 +12,7 @@
   module.exports =  {
     X: 0, // where the camera currently is - integer pixels  (suitable for canvas translate)
     Y: 0,
+    scale: 1,
     update: function() {
       // move the camera slightly towards the target, called from the raf function
       curX = curX*.9 + targetX*.1;

@@ -164,18 +164,31 @@ function generateMaze(MAZE_X, MAZE_Y) {
   // TODO: add keys and locks, eg http://www.squidi.net/three/entry.php?id=4
 
   function drawMaze(ctx, cellWidth) {
-
+      ctx.fillStyle = "#eef";
       //ctx.fillStyle = "#000";
       //ctx.fillRect(0,0, W, H);
       //BFS(MAZE_X*MAZE_Y-MAZE_X);
       //var places = findPlaces();
-      for (var y=0; y<MAZE_Y; y++) {
+      for (var y=-3; y<MAZE_Y+2; y++) {
+        var x0=-3, ofs = y*MAZE_X;
         for (var x=0; x<MAZE_X; x++) {
-          var ofs = MAZE_X*y+x;
+
           if (maze[ofs]) {
+            // found air - draw rect from prev rock to this X
+            if (x0 != -1) {
+              ctx.fillRect(x0*cellWidth, y*cellWidth, (x-x0)*cellWidth, cellWidth);
+              x0 = -1;
+            }
+          }
+          else {
+            // found rock, update x0
+            if (x0 == -1) {
+              x0 = x;
+            }
+          }
             //var t= maze[ofs];
             //ctx.fillStyle = 'rgb('+t+","+t+","+t+")";
-            ctx.fillStyle = "#aaa";
+
             // if (places.topDE[ofs]) {
             //   ctx.fillStyle = "#ffa";
             // }
@@ -189,9 +202,10 @@ function generateMaze(MAZE_X, MAZE_Y) {
             //   ctx.fillStyle = "#aaf";
             // }
             //
-            ctx.fillRect(10+x*cellWidth, 10+y*cellWidth, cellWidth, cellWidth);
-          }
+            //ctx.fillRect(x*cellWidth, y*cellWidth, cellWidth, cellWidth);
+          ofs++;
         }
+        ctx.fillRect(x0*cellWidth, y*cellWidth, (2+x-x0)*cellWidth, cellWidth);
       }
   }
 

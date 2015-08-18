@@ -4,13 +4,13 @@ var rng = require('./rng');
 var PARTICLE = require('./particle');
 
 var stickman = require('./stickman');
-var KEYS = require('./input');
+
 var AUDIO = require('./audio');
 var camera = require('./camera');
-
+var player = require('./player');
 require('./fpscounter');
 
-var canvas = document.querySelector('#game');
+var canvas = document.getElementById('game');
 var ctx = canvas.getContext('2d');
 
 var Maze = require('./dfs_maze_gen');
@@ -22,6 +22,12 @@ var rand = rng();
 var totalElapsed = 0;
 
 var maze = Maze(24,20);
+
+window.onresize = function() {
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+}
+onresize();
 /*
 var jetpack = PARTICLE.ParticlePointEmitter(350, {
 	position: vector_create(),
@@ -51,45 +57,23 @@ var jetpack = PARTICLE.ParticlePointEmitter(350, {
 	area: 0.1
 });*/
 
-var player = 0;
 var anim = stickman.animations.walk;
 var flip = false;
-var cellWidth = 2*Math.min((canvas.width-20)/48, (canvas.height-20)/40);
+var cellWidth = 32;//2*Math.min((canvas.width-20)/48, (canvas.height-20)/40);
 
 
-var scale = 1.0;
 raf.start(function(elapsed) {
 
   // Clear the screen
   //ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#fff";
+  ctx.fillStyle = "#222";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 	ctx.save();
-  var step = cellWidth/2,
-     targetX = camera.X,
-     targetY = camera.Y;
-  if (KEYS[39]) {
-    targetX += step;
-  }
-  if (KEYS[38]) {
-    targetY -= step;
-  }
-  if (KEYS[37]) {
-    targetX -= step;
-  }
-  if (KEYS[40]) {
-    targetY += step;
-  }
-  if (KEYS[83]) {
-    scale = Math.min(scale + 0.05, 6);
-  }
-  if (KEYS[65]) {
-    scale = Math.max(scale - 0.05, 1);
-  }
-  camera.setTarget(targetX, targetY);
+
+  player.update(cellWidth);
   camera.update();
   ctx.translate(canvas.width/2, canvas.height/2);
-  ctx.scale(scale,scale);
+  ctx.scale(camera.scale,camera.scale);
   ctx.translate(-camera.X-canvas.width/2, -camera.Y-canvas.height/2);
   //maze should be 20x the width of the canvas
 
@@ -113,12 +97,12 @@ raf.start(function(elapsed) {
   if (KEYS[39]) {
     move = true;
     flip = false;
-    player += anim.getOffset(elapsed);
+  player += anim.getOffset(elapsed);
   }
   if (KEYS[37]) {
     move = true;
     flip = true;
-    player -= anim.getOffset(elapsed);
+  player -= anim.getOffset(elapsed);
   }
 
   if (move) {
