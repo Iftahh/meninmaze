@@ -23,9 +23,12 @@ var totalElapsed = 0;
 
 var maze = Maze(24,20);
 
+var width, height, halfWidth, halfHeight;
 window.onresize = function() {
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
+  width=canvas.width = innerWidth;
+  height=canvas.height = innerHeight;
+  halfWidth = width >> 1;
+  halfHeight = height >> 1;
 }
 onresize();
 /*
@@ -58,8 +61,16 @@ var jetpack = PARTICLE.ParticlePointEmitter(350, {
 });*/
 
 var anim = stickman.animations.walk;
-var flip = false;
-var cellWidth = 32;//2*Math.min((canvas.width-20)/48, (canvas.height-20)/40);
+var world = {
+  cellSize: 32, //2*Math.min((canvas.width-20)/48, (canvas.height-20)/40);
+  maze: maze,
+  gravity: 0.5,
+  maxSpeedX: 8,
+  maxSpeedY: 12,
+  jumpFromGround: 7.5,
+  jumpFromAir: 0.1, // smaller gravity when pressing up
+}
+
 
 
 raf.start(function(elapsed) {
@@ -67,18 +78,20 @@ raf.start(function(elapsed) {
   // Clear the screen
   //ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "#222";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, width, height);
 	ctx.save();
 
-  player.update(cellWidth);
+  player.update(world);
   camera.update();
-  ctx.translate(canvas.width/2, canvas.height/2);
+
+  ctx.translate(halfWidth, halfHeight); // zoom to mid of screen
   ctx.scale(camera.scale,camera.scale);
-  ctx.translate(-camera.X-canvas.width/2, -camera.Y-canvas.height/2);
+  ctx.translate(-camera.X, -camera.Y); // translate camera
   //maze should be 20x the width of the canvas
 
 
-  maze.draw(ctx, cellWidth);
+  maze.draw(ctx, world.cellSize);
+  player.draw(ctx);
   ctx.restore();
   /*
   ctx.save();

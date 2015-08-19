@@ -163,8 +163,9 @@ function generateMaze(MAZE_X, MAZE_Y) {
 
   // TODO: add keys and locks, eg http://www.squidi.net/three/entry.php?id=4
 
-  function drawMaze(ctx, cellWidth) {
+  function drawMaze(ctx, cellSize) {
       ctx.fillStyle = "#eef";
+      var small = cellSize/3;
       //ctx.fillStyle = "#000";
       //ctx.fillRect(0,0, W, H);
       //BFS(MAZE_X*MAZE_Y-MAZE_X);
@@ -176,8 +177,14 @@ function generateMaze(MAZE_X, MAZE_Y) {
           if (maze[ofs]) {
             // found air - draw rect from prev rock to this X
             if (x0 != -1) {
-              ctx.fillRect(x0*cellWidth, y*cellWidth, (x-x0)*cellWidth, cellWidth);
+              ctx.fillRect(x0*cellSize, y*cellSize, (x-x0)*cellSize, cellSize);
               x0 = -1;
+            }
+
+            if (maze.places.bottomDE[ofs]) {
+               ctx.fillStyle = "#faa";
+               ctx.fillRect(x*cellSize+small, y*cellSize+small, small,small);
+               ctx.fillStyle = "#eef";
             }
           }
           else {
@@ -202,16 +209,19 @@ function generateMaze(MAZE_X, MAZE_Y) {
             //   ctx.fillStyle = "#aaf";
             // }
             //
-            //ctx.fillRect(x*cellWidth, y*cellWidth, cellWidth, cellWidth);
+            //ctx.fillRect(x*cellSize, y*cellSize, cellSize, cellSize);
           ofs++;
         }
-        ctx.fillRect(x0*cellWidth, y*cellWidth, (2+x-x0)*cellWidth, cellWidth);
+        ctx.fillRect(x0*cellSize, y*cellSize, (2+x-x0)*cellSize, cellSize);
       }
   }
 
   maze.BFS = BFS;
-  maze.findPlaces = findPlaces;
+  maze.places = findPlaces();
   maze.draw = drawMaze;
+  maze.get = function(x,y) {
+    return maze[y*MAZE_X+x];
+  }
   return maze;
 }
 
