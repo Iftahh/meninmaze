@@ -64,11 +64,13 @@ var anim = stickman.animations.walk;
 var world = {
   cellSize: 32, //2*Math.min((canvas.width-20)/48, (canvas.height-20)/40);
   maze: maze,
-  gravity: 0.5,
-  maxSpeedX: 8,
-  maxSpeedY: 12,
-  jumpFromGround: 7.5,
-  jumpFromAir: 0.1, // smaller gravity when pressing up
+  gravity: 0.5, // reduce speed Y every tick
+  maxSpeedX: 6,
+  maxSpeedY: 8,
+  jumpFromGround: 7.5, // boost up speed when jumping off ground
+  jumpFromAir: 0.1, // smaller gravity when pressing up even in air
+  chanceJumpWall: 0.2,  // chance to be able to jump from
+  wallFriction: 0.7,
 }
 
 

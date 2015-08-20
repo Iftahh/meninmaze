@@ -34,11 +34,11 @@ module.exports = {
     vy += world.gravity;
     vy = Math.min(vy, world.maxSpeedY);
 
-    if (KEYS[39]) {
+    if (KEYS[39]) { // RIGHT
       vx += step;
       vx = Math.min(vx, world.maxSpeedX);
     }
-    else if (KEYS[37]) {
+    else if (KEYS[37]) {  // LEFT
       vx -= step;
       vx = Math.max(vx, -world.maxSpeedX);
     }
@@ -88,23 +88,27 @@ module.exports = {
       if (!world.maze.get(cellXRight, cellYTop) || !world.maze.get(cellXRight, cellYBottom)) {
           // collided right, move to closest to left edge of cell
         x = cellXRight * world.cellSize - WIDTH-1;
-        vx = 999;
+        vx = 0;
+        if (KEYS[39] && vy > 0) {
+          //collided with wall, moving down, pressing left = slide down walls
+          vy *= world.wallFriction;
+          if (Math.random() < world.chanceJumpWall) {  // small chance to be "onGround" and be able to jump
+            onGround = true;
+          }
+        }
       }
     }
     else if (vx < 0) {
       if (!world.maze.get(cellXLeft, cellYTop) || !world.maze.get(cellXLeft, cellYBottom)) {
           // collided left, move to right edge of cell
         x = (cellXLeft+1)*world.cellSize+1;
-        vx = 999;
-      }
-    }
-    if (vx == 999) {
-      vx = 0;
-      if (vy > 0) {
-        //collided with wall, moving down = slide down walls
-        vy *= 0.7;
-        if (Math.random() < 0.1) {
-          onGround = true;
+        vx = 0;
+        if (KEYS[37] && vy > 0) {
+          //collided with wall, moving down = slide down walls
+          vy *= world.wallFriction;
+          if (Math.random() < world.chanceJumpWall) {
+            onGround = true;
+          }
         }
       }
     }
