@@ -1,5 +1,6 @@
 var camera = require('./camera');
 var KEYS = require('./input');
+var stickman = require('./stickman');
 
 (function() {
 
@@ -7,16 +8,29 @@ var KEYS = require('./input');
   var x=0, y=0,
     vx=0,vy=0,
     onGround= 1,
-    WIDTH=15, HEIGHT=20;
+    WIDTH=15, HEIGHT=25,
+    totalElapsed=0,
+    curAnim,
+    run = stickman.animations.run,
+    direction=0,
+    stand = stickman.animations.stand;
 
+
+function setAnim(anim) {
+  if (anim != curAnim) {
+    curAnim = anim;
+    totalElapsed = 0;
+  }
+}
 
 // public
 module.exports = {
 
 
-  update: function(world) {
+  update: function(world, elapsed) {
     var step = world.cellSize/60;
 
+    totalElapsed += elapsed;
     // update speed
     /*if (KEYS[40]) {
       vy += step;
@@ -30,6 +44,7 @@ module.exports = {
         vy -= world.jumpFromAir;
       }
       vy = Math.max(vy, -world.maxSpeedY);
+
     }
     vy += world.gravity;
     vy = Math.min(vy, world.maxSpeedY);
@@ -37,15 +52,22 @@ module.exports = {
     if (KEYS[39]) { // RIGHT
       vx += step;
       vx = Math.min(vx, world.maxSpeedX);
+      setAnim(run);
+      direction = 0;
     }
     else if (KEYS[37]) {  // LEFT
       vx -= step;
       vx = Math.max(vx, -world.maxSpeedX);
+      setAnim(run);
+      direction = 1;
     }
     else {
       vx *= .2;
       if (Math.abs(vx) < 0.01) {
         vx = 0;
+        if (onGround) {
+          setAnim(stand);
+        }
       }
     }
 
@@ -113,6 +135,15 @@ module.exports = {
       }
     }
 
+    if (!onGround) {
+      if (vy > 0) {
+        setAnim(stickman.animations.fall);
+      }
+      else {
+        setAnim(stickman.animations.jump);
+      }
+    }
+
     x += vx;
     y += vy;
     if (KEYS[83]) {
@@ -125,14 +156,28 @@ module.exports = {
 
   },
 
-  draw: function(ctx) {
+  draw: function(ctx,dt) {
     if (onGround) {
       ctx.fillStyle = "#ff0";
     }
     else {
       ctx.fillStyle = "#0f0";
     }
-    ctx.fillRect(x, y, WIDTH, HEIGHT);
+    ctx.save()
+    // ctx.translate(x,y)
+    // ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    // ctx.translate(WIDTH/2, HEIGHT);
+    ctx.translate(x+WIDTH/2, y+HEIGHT);
+    ctx.scale(0.15,0.15);
+    ctx.lineWidth = 15;
+    ctx.lineJoin = 'bevel';
+
+    if (direction) {
+      ctx.scale(-1,1);
+    }
+
+    curAnim.render(ctx, totalElapsed);
+    ctx.restore()
   }
 }
 })();

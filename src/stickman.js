@@ -29,32 +29,37 @@ function StickMan() {
 	this.animations = {};
 }
 
-StickMan.prototype.add = function(key, duration, width, frames) {
-	this.animations[key] = new StickAnimation(duration, width, frames);
+StickMan.prototype.add = function(key, duration,  frames, flip, repeat) {
+	this.animations[key] = new StickAnimation(duration,  frames, flip, repeat);
 };
 
 
-function StickAnimation(duration, width, frames) {
+function StickAnimation(duration, frames, flip, repeat) {
   this.duration = duration;
-	this.width = width;
-	this.frames = frames;
+	this.repeat = repeat;
+	//this.frames = frames;
 	// duplicate frames with flip arms and legs
-	// this.frames = frames.slice();
-	// for (var i=0; i<frames.length; i++) {
-	// 	var frame = frames[i];
-	// 	var newFrame = frame.slice();
-	// 	for (var k=6; k<10; k++) {
-	// 		newFrame[k] = frame[k+4]; // switch hands
-	// 		newFrame[k+4] = frame[k];
-	// 		newFrame[k+10] = frame[k+16];
-	// 		newFrame[k+16] = frame[k+10];
-	// 	}
-	// 	newFrame[20] = frame[26];
-	// 	newFrame[21] = frame[27];
-	// 	newFrame[26] = frame[20];
-	// 	newFrame[27] = frame[21];
-	// 	this.frames.push(newFrame)
-	// }
+	if (flip) {
+		this.frames = frames.slice();
+		for (var i=0; i<frames.length; i++) {
+			var frame = frames[i];
+			var newFrame = frame.slice();
+			for (var k=6; k<10; k++) {
+				newFrame[k] = frame[k+4]; // switch hands
+				newFrame[k+4] = frame[k];
+				newFrame[k+10] = frame[k+16];
+				newFrame[k+16] = frame[k+10];
+			}
+			newFrame[20] = frame[26];
+			newFrame[21] = frame[27];
+			newFrame[26] = frame[20];
+			newFrame[27] = frame[21];
+			this.frames.push(newFrame)
+		}
+	}
+	else {
+		this.frames = frames;
+	}
 }
 
 
@@ -67,33 +72,37 @@ function linearMix(frame1, frame2, fraction) {
 	return result;
 }
 
-StickAnimation.prototype.getOffset = function(elapsed) {
-	return this.width*elapsed/this.duration;
-}
+// StickAnimation.prototype.getOffset = function(elapsed) {
+// 	return this.width*elapsed/this.duration;
+// }
 
-var lastFrame = -1;
+// var lastFrame = -1;
 StickAnimation.prototype.render = function(ctx, elapsed) {
 	var anim = this;
 	var duration = anim.duration;
-	var width = anim.width;
 	ctx.save();
-	//ctx.translate(-anim[0], -anim[1]);
 
 	var frames = anim.frames;
-	var durationPerFrame = duration/frames.length;
-	var widthPerFrame = width/frames.length;
+	var frame;
+	if (this.repeat || elapsed < duration) {
+		var durationPerFrame = duration/frames.length;
 
-	var frame1 = ((elapsed / durationPerFrame)|0)% frames.length;
-	var frame2 = (frame1+1) % frames.length;
+		var frame1 = ((elapsed / durationPerFrame)|0)% frames.length;
+		var frame2 = (frame1+1) % frames.length;
 
-  if (frame1 != lastFrame) {
-		console.log("frame1 = "+frame1);
-		lastFrame = frame1;
+	  // if (frame1 != lastFrame) {
+		// 	console.log("frame1 = "+frame1);
+		// 	lastFrame = frame1;
+		// }
+		var partialElapsed = elapsed % durationPerFrame;
+
+		frame = linearMix(frames[frame1], frames[frame2],
+				partialElapsed/durationPerFrame);
 	}
-	var partialElapsed = elapsed % durationPerFrame;
-
-	var frame = linearMix(frames[frame1], frames[frame2],
-			partialElapsed/durationPerFrame);
+	else {
+		// not repeat and past duration - stuck on final frame
+		frame = frames[frames.length-1];
+	}
 
 
 	var moveTo = function(i) {
@@ -103,8 +112,7 @@ StickAnimation.prototype.render = function(ctx, elapsed) {
 		ctx.lineTo(frame[2*i], frame[2*i+1]);
 	}
 
-	ctx.lineWidth = 2;
-	ctx.lineCap = "round";
+//	ctx.lineCap = "round";
 
 	ctx.strokeStyle = "#222299";
   ctx.beginPath();
@@ -152,11 +160,12 @@ StickAnimation.prototype.render = function(ctx, elapsed) {
 
 var sm = new StickMan();
 
-var walkFrames = require('./tools/run.js');
+sm.add('run',
+				0.6, // seconds for walk cycle
+				require('./tools/run'), true, true)
 
-sm.add('walk',
-				2.4, // seconds for walk cycle
-				340, // pixels to move
-				walkFrames)
+sm.add('stand', 3.2, require('./tools/stand'), true, true);
+sm.add('jump', 1.2, require('./tools/jump'), false, false);
+sm.add('fall', 2.4, require('./tools/fall'), false, false);
 
 module.exports = sm;

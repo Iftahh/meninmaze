@@ -3,7 +3,6 @@ var raf = require('./raf');
 var rng = require('./rng');
 var PARTICLE = require('./particle');
 
-var stickman = require('./stickman');
 
 var AUDIO = require('./audio');
 var camera = require('./camera');
@@ -61,9 +60,6 @@ var jetpack = PARTICLE.ParticlePointEmitter(350, {
 });*/
 
 
-var KEYS = require('./input');
-var flip = 0, playerX=0;
-var anim = stickman.animations.walk;
 
 var world = {
   cellSize: 32, //2*Math.min((canvas.width-20)/48, (canvas.height-20)/40);
@@ -87,7 +83,7 @@ raf.start(function(elapsed) {
   ctx.fillRect(0, 0, width, height);
 	ctx.save();
 
-  player.update(world);
+  player.update(world, elapsed);
   camera.update();
 
   ctx.translate(halfWidth, halfHeight); // zoom to mid of screen
@@ -101,54 +97,13 @@ raf.start(function(elapsed) {
   ctx.restore();
 
 
-  ctx.save();
-  //ctx.scale(0.5, 0.8);
-  ctx.translate(160, 200);
-  ctx.strokeStyle = "black";
-  ctx.lineWidth = 3;
-  ctx.beginPath()
-  ctx.moveTo(0,0)
-  ctx.lineTo(90,0)
-  ctx.moveTo(180,0)
-  ctx.lineTo(270,0)
-  ctx.stroke();
 
-  var move = false;
-  if (KEYS[39]) {
-    move = true;
-    flip = false;
-  playerX += anim.getOffset(elapsed);
-  }
-  if (KEYS[37]) {
-    move = true;
-    flip = true;
-    playerX -= anim.getOffset(elapsed);
-  }
-
-  if (move) {
-    if (flip) {
-        totalElapsed -= elapsed;
-    }
-    else {
-      totalElapsed += elapsed;
-    }
-  }
-  else {
-    //totalElapsed = 0;
-  }
-
-
-  ctx.translate(playerX, 0);
   // if (flip) {
   //   ctx.scale(-1,1);
   // }
   // if ((totalElapsed % 5) > 2.5) {
   // 	ctx.translate(300,0);
   // }
-  anim.render(ctx, totalElapsed);
-
-
-  ctx.restore();
 
 	checkfps();
 });

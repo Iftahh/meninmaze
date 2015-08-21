@@ -63,6 +63,7 @@ for text in open(fname):
     if "<title>end" in text:
         break
     if "<title>Layer" in text:
+        print "text: {} adding frame with {} points".format(text, len(frame))
         if frame:
             frames.append(frame)
             frame = []
@@ -90,6 +91,7 @@ for text in open(fname):
         line = scanner.search()
 
 if frame:
+    print "at end adding frame with {} points".format(len(frame))
     frames.append(frame)
 maxY = -1000
 for frame in frames:
