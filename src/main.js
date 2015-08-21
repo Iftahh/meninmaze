@@ -60,7 +60,11 @@ var jetpack = PARTICLE.ParticlePointEmitter(350, {
 	area: 0.1
 });*/
 
+
+var KEYS = require('./input');
+var flip = 0, playerX=0;
 var anim = stickman.animations.walk;
+
 var world = {
   cellSize: 32, //2*Math.min((canvas.width-20)/48, (canvas.height-20)/40);
   maze: maze,
@@ -95,7 +99,8 @@ raf.start(function(elapsed) {
   maze.draw(ctx, world.cellSize);
   player.draw(ctx);
   ctx.restore();
-  /*
+
+
   ctx.save();
   //ctx.scale(0.5, 0.8);
   ctx.translate(160, 200);
@@ -112,33 +117,38 @@ raf.start(function(elapsed) {
   if (KEYS[39]) {
     move = true;
     flip = false;
-  player += anim.getOffset(elapsed);
+  playerX += anim.getOffset(elapsed);
   }
   if (KEYS[37]) {
     move = true;
     flip = true;
-  player -= anim.getOffset(elapsed);
+    playerX -= anim.getOffset(elapsed);
   }
 
   if (move) {
-    totalElapsed += elapsed;
+    if (flip) {
+        totalElapsed -= elapsed;
+    }
+    else {
+      totalElapsed += elapsed;
+    }
   }
   else {
-    totalElapsed = 0;
+    //totalElapsed = 0;
   }
 
-  if (anim) {
-    ctx.translate(player, 0);
-    if (flip) {
-      ctx.scale(-1,1);
-    }
-    // if ((totalElapsed % 5) > 2.5) {
-    // 	ctx.translate(300,0);
-    // }
-    anim.render(ctx, totalElapsed);
-  }
+
+  ctx.translate(playerX, 0);
+  // if (flip) {
+  //   ctx.scale(-1,1);
+  // }
+  // if ((totalElapsed % 5) > 2.5) {
+  // 	ctx.translate(300,0);
+  // }
+  anim.render(ctx, totalElapsed);
+
 
   ctx.restore();
-*/
+
 	checkfps();
 });

@@ -58,6 +58,7 @@ def getInt(regex, text):
 
 frames = []
 frame = []
+
 for text in open(fname):
     if "<title>end" in text:
         break
@@ -88,6 +89,8 @@ for text in open(fname):
 
         line = scanner.search()
 
+if frame:
+    frames.append(frame)
 maxY = -1000
 for frame in frames:
     A = frame[0]
@@ -96,17 +99,18 @@ for frame in frames:
     for coordinate in frame:
         coordinate[0] -= centerX
         maxY = max(maxY, coordinate[1])
-print "[ // {} frames generated from {}".format(len(frames), fname )
+outfile = open(fname.replace('.svg', '.js'), 'w')
+print >> outfile, "module.exports = [ // {} frames generated from {}".format(len(frames), fname )
 for frameIdx, frame in enumerate(frames):
     for idx, coordinate in enumerate(frame):
         if idx == 0:
             if frameIdx == 0:
-                print "[  // frame {}".format(frameIdx)
+                print  >> outfile, "[  // frame {}".format(frameIdx)
             else:
-                print "], [  // frame {}".format(frameIdx)
-            print "      ",
+                print  >> outfile, "], [  // frame {}".format(frameIdx)
+            print >> outfile, "      ",
         else:
-            print "    , ",
+            print >> outfile, "    , ",
         coordinate[1] -= maxY
-        print "{: >4}, {: <4}  // {}".format(coordinate[0], coordinate[1],  pointNames[idx])
-print "]]"
+        print >> outfile, "{: >4}, {: <4}  // {}".format(coordinate[0], coordinate[1],  pointNames[idx])
+print >> outfile, "]]"
