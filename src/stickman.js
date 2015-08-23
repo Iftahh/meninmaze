@@ -30,11 +30,12 @@ function StickMan() {
 }
 
 StickMan.prototype.add = function(key, duration,  frames, flip, repeat) {
-	this.animations[key] = new StickAnimation(duration,  frames, flip, repeat);
+	this.animations[key] = new StickAnimation(key, duration,  frames, flip, repeat);
 };
 
 
-function StickAnimation(duration, frames, flip, repeat) {
+function StickAnimation(name, duration, frames, flip, repeat) {
+	this.name = name; // TODO: remove, only for debug
   this.duration = duration;
 	this.repeat = repeat;
 	//this.frames = frames;
@@ -76,24 +77,26 @@ function linearMix(frame1, frame2, fraction) {
 // 	return this.width*elapsed/this.duration;
 // }
 
-// var lastFrame = -1;
+var lastFrame = -1;
 StickAnimation.prototype.render = function(ctx, elapsed) {
-	var anim = this;
-	var duration = anim.duration;
+	var duration = this.duration;
 	ctx.save();
 
-	var frames = anim.frames;
+	var frames = this.frames;
 	var frame;
 	if (this.repeat || elapsed < duration) {
 		var durationPerFrame = duration/frames.length;
 
 		var frame1 = ((elapsed / durationPerFrame)|0)% frames.length;
 		var frame2 = (frame1+1) % frames.length;
+		if (!this.repeat && frame2==0) {
+			frame2 = frame1; // when not repeating and end of anim the next frame is the same as last
+		}
 
-	  // if (frame1 != lastFrame) {
-		// 	console.log("frame1 = "+frame1);
-		// 	lastFrame = frame1;
-		// }
+	  if (frame1 != lastFrame) {
+			console.log("frame1 = "+frame1);
+			lastFrame = frame1;
+		}
 		var partialElapsed = elapsed % durationPerFrame;
 
 		frame = linearMix(frames[frame1], frames[frame2],
@@ -137,6 +140,11 @@ StickAnimation.prototype.render = function(ctx, elapsed) {
 //	ctx.lineTo(frame[4], frame[5]);
   moveTo(0);
   lineTo(7); // B
+	lineTo(8); // Knee1
+	lineTo(9); // Foot1 start
+	lineTo(10); // Foot1 end
+
+
 	ctx.stroke();
 
 	ctx.strokeStyle = "#6666dd";
@@ -144,11 +152,6 @@ StickAnimation.prototype.render = function(ctx, elapsed) {
 	moveTo(0);  // A
 	lineTo(3);  // Elbow
 	lineTo(4);  // Hand
-
-	moveTo(7); // B
-	lineTo(8); // Knee1
-	lineTo(9); // Foot1 start
-	lineTo(10); // Foot1 end
 
 	ctx.stroke();
 	ctx.restore();
@@ -163,9 +166,11 @@ var sm = new StickMan();
 sm.add('run',
 				0.6, // seconds for walk cycle
 				require('./tools/run'), true, true)
-
+var jump = require('./tools/jump'),
+	fall = require('./tools/fall');
+fall.unshift(jump[jump.length-1]); // fall starts with frame that is the final jump frame
 sm.add('stand', 3.2, require('./tools/stand'), true, true);
-sm.add('jump', 1.2, require('./tools/jump'), false, false);
-sm.add('fall', 2.4, require('./tools/fall'), false, false);
+sm.add('jump', .4, jump, false, false);
+sm.add('fall', .4, fall, false, false);
 
 module.exports = sm;
