@@ -8,6 +8,7 @@ var stickman = require('./stickman');
   var x=0, y=0,
     vx=0,vy=0,
     onGround= 1,
+    onWall=0,
     WIDTH=15, HEIGHT=25,
     totalElapsed=0,
     curAnim,
@@ -19,6 +20,7 @@ var stickman = require('./stickman');
 function setAnim(anim) {
   if (anim != curAnim) {
     curAnim = anim;
+    console.log("Setting anim to "+anim.name);
     totalElapsed = 0;
   }
 }
@@ -49,27 +51,28 @@ module.exports = {
     vy += world.gravity;
     vy = Math.min(vy, world.maxSpeedY);
 
+    var groundAnim = run;
     if (KEYS[39]) { // RIGHT
       vx += step;
       vx = Math.min(vx, world.maxSpeedX);
-      setAnim(run);
       direction = 0;
     }
     else if (KEYS[37]) {  // LEFT
       vx -= step;
       vx = Math.max(vx, -world.maxSpeedX);
-      setAnim(run);
       direction = 1;
     }
     else {
       vx *= .2;
       if (Math.abs(vx) < 0.01) {
         vx = 0;
-        if (onGround) {
-          setAnim(stand);
-        }
+        groundAnim = stand;
       }
     }
+    if (onGround && !onWall) {
+      setAnim(groundAnim);
+    }
+
 
     // COLLISION DETECTION
 
@@ -81,7 +84,7 @@ module.exports = {
       cellYBottom = Math.floor((HEIGHT+y+vy) / world.cellSize);
 
 
-    onGround = 0;
+    onWall=onGround = 0;
     if (vy > 0) {
       //moving down
       if (!world.maze.get(cellXLeft, cellYBottom) || !world.maze.get(cellXRight, cellYBottom)) {
@@ -114,9 +117,8 @@ module.exports = {
         if (KEYS[39] && vy > 0) {
           //collided with wall, moving down, pressing left = slide down walls
           vy *= world.wallFriction;
-          if (Math.random() < world.chanceJumpWall) {  // small chance to be "onGround" and be able to jump
-            onGround = true;
-          }
+          onGround = Math.random() < world.chanceJumpWall;  // small chance to be "onGround" and be able to jump
+          onWall = 1;
         }
       }
     }
@@ -128,9 +130,8 @@ module.exports = {
         if (KEYS[37] && vy > 0) {
           //collided with wall, moving down = slide down walls
           vy *= world.wallFriction;
-          if (Math.random() < world.chanceJumpWall) {
-            onGround = true;
-          }
+          onGround = Math.random() < world.chanceJumpWall;
+          onWall = 1;
         }
       }
     }
