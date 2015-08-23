@@ -38,7 +38,8 @@ var p0 = 10 + 55+65+55,
 
 
 utils.each(['mousedown','mouseup', 'touchstart','touchmove','touchend'], function(evName) {
-  document.getElementById("left").addEventListener(evName, function(event) {
+  //document.getElementById("left")
+  left.addEventListener(evName, function(event) {
       event.preventDefault();
       var type = event.type, x=event.clientX, y=event.clientY;
       if (type=='touchend') {

@@ -2,14 +2,13 @@
 var raf = require('./raf');
 var rng = require('./rng');
 var PARTICLE = require('./particle');
-
+var client = require('./client');
 
 var AUDIO = require('./audio');
 var camera = require('./camera');
 var player = require('./player');
 require('./fpscounter');
 
-var canvas = document.getElementById('game');
 var ctx = canvas.getContext('2d');
 
 var Maze = require('./dfs_maze_gen');

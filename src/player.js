@@ -20,14 +20,18 @@ var stickman = require('./stickman');
 function setAnim(anim) {
   if (anim != curAnim) {
     curAnim = anim;
-    console.log("Setting anim to "+anim.name);
+    //console.log("Setting anim to "+anim.name);
     totalElapsed = 0;
   }
 }
 
 // public
 module.exports = {
-
+  serialize: function() {
+    return {
+      x: x, y:y, anim:curAnim.name
+    }
+  },
 
   update: function(world, elapsed) {
     var step = world.cellSize/60;
@@ -70,6 +74,7 @@ module.exports = {
       }
     }
     if (onGround && !onWall) {
+      // walk, run, brakes, stand,  these should be set only if on ground and not sliding on wall
       setAnim(groundAnim);
     }
 

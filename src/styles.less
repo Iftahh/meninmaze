@@ -1,5 +1,4 @@
 body {
-  text-shadow: 0 0 3px #222;
   font-family: sans-serif;
   margin:0;
 }
@@ -48,6 +47,7 @@ body {
   color: #fff;
   cursor: pointer;
   -webkit-user-select: none;
+  text-shadow: 0 0 3px #222;
 }
 .clicked {
   box-shadow: 1px 1px 2px rgba(0,0,0,0.8);
@@ -69,6 +69,7 @@ body {
 #left span {
   /*background: rgba(55,55,55,0.9);*/
   border: 2px outset rgba(125,125,125,0.6);
+  text-shadow: 0 0 3px #222;
   border-radius: 3px;
   height: 100%;
   display: inline-block;
@@ -107,4 +108,75 @@ body {
 .h2 {
   height: 65px;
   line-height: 65px;
+}
+
+
+#messageBox {
+  position: absolute;
+  bottom: 10%;
+  left: 10%;
+  width: 80%;
+  text-align: center;
+}
+
+#messageBox p {
+  color: #FFF;
+  margin: 0;
+  opacity: 0;
+  transition: 10s;
+}
+#messageBox p.show {
+  opacity: 1;
+  transition: 0s;
+}
+
+#dialog {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -100px;
+  margin-top: -50px;
+  width: 200px;
+  padding: 10px;
+  border: 1px solid #DDD;
+  background: #BBD;
+  font-size: 14px;
+  color: #333;
+  border-radius: 3px;
+  box-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+}
+
+#dialogTitle {
+  font-size: 20px;
+  line-height: 30px;
+  color: #EEE;
+  background: #888;
+  text-align: center;
+  margin: -10px -10px 0 -10px;
+  border-bottom: 2px solid #DDD;
+}
+
+
+#dialogContent {
+  text-align: left;
+  padding: 20px 10px;
+  border-bottom: 1px solid #CCC;
+}
+
+#dialog input {
+  width: 100%;
+  border: 1px solid #888;
+  background: #FFF;
+  font-size: 20px;
+  text-align: center;
+}
+
+#dialogBtFunc {
+  cursor: pointer;
+  display: inline-block;
+  border: 2px solid #DDD;
+  background: #888;
+  color: #EEE;
+  margin-top: 10px;
+  padding: 5px 10px;
 }
