@@ -32,10 +32,8 @@ document.addEventListener('keydown', updateFromKeys);
 document.addEventListener('keyup', updateFromKeys);
 
 // UGLY - using hard coded values from CSS
-var p0 = 10 + 55+65+55,
-  p1 = 10+55+65,
-  p2 = 10+55;
-
+var p0 = 10 + 65+55,
+  p1 = 10+65;
 
 utils.each(['mousedown','mouseup', 'touchstart','touchmove','touchend'], function(evName) {
   //document.getElementById("left")
@@ -43,7 +41,6 @@ utils.each(['mousedown','mouseup', 'touchstart','touchmove','touchend'], functio
       event.preventDefault();
       var type = event.type, x=event.clientX, y=event.clientY;
       if (type=='touchend') {
-        updateFromKeys({type:0, keyCode: 40 }, event);
         updateFromKeys({type:0, keyCode: 39 }, event);
         updateFromKeys({type:0, keyCode: 38 }, event);
         updateFromKeys({type:0, keyCode: 37 }, event);
@@ -69,12 +66,7 @@ utils.each(['mousedown','mouseup', 'touchstart','touchmove','touchend'], functio
 
       }
       var y = innerHeight - y;
-      if (y < p2) {
-        e.keyCode = 40;
-        updateFromKeys(e, event);
-        updateFromKeys({type:0, keyCode: 38 }, event);
-      }
-      else if (y < p0 && p1<y) {
+      if (y < p0 && p1<y) {
         e.keyCode = 38;
         updateFromKeys(e, event);
         updateFromKeys({type:0, keyCode: 40 }, event);
