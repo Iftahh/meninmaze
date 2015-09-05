@@ -225,16 +225,4 @@ function generateMaze(MAZE_X, MAZE_Y) {
   return maze;
 }
 
-/*
-var MAZE_X=48,
-    MAZE_Y=40,
-    maze = generateMaze(MAZE_X/2, MAZE_Y/2),
-
-    W = 600,
-    H = 400;//,
-
-  //  ctx = document.getElementById('canvas').getContext("2d");
-*/
-//drawMaze();
-
 module.exports = generateMaze;

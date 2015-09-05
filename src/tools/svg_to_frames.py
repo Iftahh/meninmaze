@@ -115,4 +115,4 @@ for frameIdx, frame in enumerate(frames):
             print >> outfile, "    , ",
         coordinate[1] -= maxY
         print >> outfile, "{: >4}, {: <4}  // {}".format(coordinate[0], coordinate[1],  pointNames[idx])
-print >> outfile, "]]"
+print >> outfile, "]];"

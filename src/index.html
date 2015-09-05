@@ -7,8 +7,26 @@
     <link rel="stylesheet" href="build.css"/>
   </head>
   <body>
+    <div id="warning-message">Landscape screen please </div>
+    <div class="menu inmenu">
+      <h1>Men In Maze</h1>
+      <h2>JS13K Game By Iftah Haimovitch</h2>
+
+      <hr>
+      <label>What is your name? <br> <input id="pname"></label><br>
+      <br>
+      What team would you like?<br>
+      <label style="color:blue"><input type="radio" name="color" id="blue" checked>Blue </label>
+      <label style="color:red"><input type="radio" name="color" id="red">Red</label><br>
+      <br>
+
+      <label>Show on screen controls? <input id="showcontrols" type="checkbox"></label><br>
+      <button id="start" disabled >Start</button>
+      <div id="messageBox"></div>
+    </div>
+
     <canvas id="canvas"></canvas>
-    <div id="left">
+    <div id="left" class="game hide">
       <div class="h1">
         <span class="w1 hidden"></span><span class="w2" id="38">&#8593;</span>
       </div>
@@ -16,14 +34,15 @@
         <span class="w1" id="37">&#8592;</span><span class="w2 hidden"></span><span class="w1" id="39">&#8594;</span>
       </div>
     </div>
-    <div class="button hit" id="83">Hit</div>
-    <div class="button block" id="65">Block</div>
+    <div class="button hit game hide" id="83">Hit</div>
+    <div class="button block game hide" id="65">Block</div>
 
     <div id="dialog" style="display:none">
       <h2 id="dialogTitle">Dialog Title</h2>
       <div id="dialogContent">Dialog content.</div>
       <b id="dialogBtFunc">Button</b>
     </div>
+
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="build.js"></script>

@@ -156,7 +156,7 @@ module.exports = {
 //         lastTime = currTime + timeToCall;
 //     }
 // }
-
+/*
 if (false) {
 	window.onerror = function(errorMsg, url, lineNumber) {
 		if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
@@ -188,7 +188,7 @@ if (false) {
 			console.log("standard_globals = ["+_keys.join(", ")+"]")
 		}
 	}
-}
+}*/
 
 // // get img data from
 // var getPixels= function(ctx) {

@@ -1,6 +1,5 @@
-module.exports = function(seed) {
-  var random = Math.random//whrandom(seed);
-  var rng = {
+var random = Math.random;
+module.exports = {
     /**
      * Return an integer within [0, max).
      *
@@ -51,9 +50,6 @@ module.exports = function(seed) {
       return source[rng.int(source.length)];
     }
   };
-
-  return rng;
-};
 
 // /**
 //  * Generate a seeded random number using Python's whrandom implementation.

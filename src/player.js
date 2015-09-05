@@ -1,11 +1,13 @@
 var camera = require('./camera');
+var rng = require('./rng');
 var KEYS = require('./input');
-var stickman = require('./stickman');
+var StickMan = require('./stickman'),
+  stickman = new StickMan(70,70,170);
 
 (function() {
 
 // private:
-  var x=0, y=0,
+  var x=5, y=0,
     vx=0,vy=0,
     onGround= 1,
     onWall=0,
@@ -27,10 +29,36 @@ function setAnim(anim) {
 
 // public
 module.exports = {
+  color: 1, // 1 = blue, 2=red
+  name: 'Player '+rng.int(10000),
   serialize: function() {
     return {
-      x: x, y:y, anim:curAnim.name
+      x: x, y:y, anim:curAnim.name, dir:direction
     }
+  },
+
+  setColor: function(col) {
+    this.color = col;
+    stickman = new StickMan(col==1?70:170,70,col!=1?70:170);
+    if (this.emitPlayerInfo) {
+      this.emitPlayerInfo();
+    }
+  },
+
+  setName: function(name) {
+    if (name != this.name) {
+      this.name = name;
+      if (this.emitPlayerInfo) {
+        this.emitPlayerInfo();
+      }
+    }
+  },
+
+  setXYAD: function(xx,yy,anim,dir) {
+    x=xx;
+    y=yy;
+    curAnim = stickman.animations[anim];
+    direction = dir;
   },
 
   update: function(world, elapsed) {
@@ -152,6 +180,7 @@ module.exports = {
 
     x += vx;
     y += vy;
+
     if (KEYS[83]) {
       camera.scale = Math.min(camera.scale + 0.05, 5);
     }
@@ -163,26 +192,20 @@ module.exports = {
   },
 
   draw: function(ctx,dt) {
-    if (onGround) {
-      ctx.fillStyle = "#ff0";
-    }
-    else {
-      ctx.fillStyle = "#0f0";
-    }
     ctx.save()
     // ctx.translate(x,y)
     // ctx.fillRect(0, 0, WIDTH, HEIGHT);
     // ctx.translate(WIDTH/2, HEIGHT);
     ctx.translate(x+WIDTH/2, y+HEIGHT);
+    ctx.fillText(this.name, 0,-HEIGHT-5);
     ctx.scale(0.15,0.15);
     ctx.lineWidth = 15;
     ctx.lineJoin = 'bevel';
-
     if (direction) {
       ctx.scale(-1,1);
     }
+    curAnim.render(ctx, stickman, totalElapsed);
 
-    curAnim.render(ctx, totalElapsed);
     ctx.restore()
   }
 }

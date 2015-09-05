@@ -24,14 +24,7 @@
  * Knee1,FootStart,FootEnd,								  16,17, 18,19, 20,21
  * Knee2,Foot2Start, Foot2End]						  22,23, 24,25, 26,27
  ******************************************************************************/
-
-function StickMan() {
-	this.animations = {};
-}
-
-StickMan.prototype.add = function(key, duration,  frames, flip, repeat) {
-	this.animations[key] = new StickAnimation(key, duration,  frames, flip, repeat);
-};
+(function() {
 
 
 function StickAnimation(name, duration, frames, flip, repeat) {
@@ -77,8 +70,8 @@ function linearMix(frame1, frame2, fraction) {
 // 	return this.width*elapsed/this.duration;
 // }
 
-var lastFrame = -1;
-StickAnimation.prototype.render = function(ctx, elapsed) {
+//var lastFrame = -1;
+StickAnimation.prototype.render = function(ctx, stickman, elapsed) {
 	var duration = this.duration;
 	ctx.save();
 
@@ -93,10 +86,10 @@ StickAnimation.prototype.render = function(ctx, elapsed) {
 			frame2 = frame1; // when not repeating and end of anim the next frame is the same as last
 		}
 
-	  if (frame1 != lastFrame) {
-			console.log("frame1 = "+frame1);
-			lastFrame = frame1;
-		}
+	  // if (frame1 != lastFrame) {
+		// 	console.log("frame1 = "+frame1);
+		// 	lastFrame = frame1;
+		// }
 		var partialElapsed = elapsed % durationPerFrame;
 
 		frame = linearMix(frames[frame1], frames[frame2],
@@ -117,7 +110,7 @@ StickAnimation.prototype.render = function(ctx, elapsed) {
 
 //	ctx.lineCap = "round";
 
-	ctx.strokeStyle = "#222299";
+	ctx.strokeStyle = stickman.col1;
   ctx.beginPath();
 	moveTo(0);  // A
 	lineTo(5);  // Elbow 2
@@ -129,7 +122,7 @@ StickAnimation.prototype.render = function(ctx, elapsed) {
 	lineTo(13); // Foot2 end
 	ctx.stroke();
 
-	ctx.strokeStyle = "#4444bb";
+	ctx.strokeStyle = stickman.col2;
 	ctx.beginPath();
 	moveTo(0); // A
 	lineTo(1); // HeadStart
@@ -147,7 +140,7 @@ StickAnimation.prototype.render = function(ctx, elapsed) {
 
 	ctx.stroke();
 
-	ctx.strokeStyle = "#6666dd";
+	ctx.strokeStyle = stickman.col3;
   ctx.beginPath();
 	moveTo(0);  // A
 	lineTo(3);  // Elbow
@@ -159,18 +152,31 @@ StickAnimation.prototype.render = function(ctx, elapsed) {
 
 };
 
+function StickMan(r,g,b) {
+	var f = 0.8;
+	this.col1 = 'rgb('+(r*f|0)+','+(g*f|0)+','+(b*f|0)+')';
+	f = 1;
+	this.col2 = 'rgb('+(r*f|0)+','+(g*f|0)+','+(b*f|0)+')';
+	f = 1.3;
+	this.col3 = 'rgb('+(r*f|0)+','+(g*f|0)+','+(b*f|0)+')';
+
+}
+
+StickMan.prototype.animations = {}
+var add = function(key, duration,  frames, flip, repeat) {
+	StickMan.prototype.animations[key] = new StickAnimation(key, duration,  frames, flip, repeat);
+};
 
 
-var sm = new StickMan();
-
-sm.add('run',
-				0.6, // seconds for walk cycle
-				require('./tools/run'), true, true)
 var jump = require('./tools/jump'),
 	fall = require('./tools/fall');
 fall.unshift(jump[jump.length-1]); // fall starts with frame that is the final jump frame
-sm.add('stand', 3.2, require('./tools/stand'), true, true);
-sm.add('jump', .4, jump, false, false);
-sm.add('fall', .4, fall, false, false);
 
-module.exports = sm;
+add('run', 0.6, /* seconds for walk cycle */	require('./tools/run'), true, true);
+add('stand', 3.2, require('./tools/stand'), true, true);
+add('jump', .4, jump, false, false);
+add('fall', .4, fall, false, false);
+
+module.exports = StickMan;
+
+})();

@@ -1,48 +1,60 @@
-
+utils = require('./utils')
 var player = require('./player')
 
+
+/*********
+1. player 1 connect - get game state, join game if possible
+   - game state:  waiting for more players
+2. player 2..N opens game - join game
+   - game state:  can Start
+3. player 1..N change color/name - update server, server updates 1..N
+3. player X starts game
+   - game state: started, level created
+4. player 1..N updates server every 33ms
+5. server moves NPCs and updates 1..N players every 33ms
+6. game ends - goes back to waiting for users
+**********/
+
+
 var socket = {};
-var config = {
+var gameState = {
   p1: {
     x: 0,
     y: 0,
     anim: 'stand',
   },
 };
-var connected = false;
-var playerName = 'Player '+Math.round(100000*Math.random());
 
 function connect() {
-  connected = true;
   console.log('connecting');
-  if (!socket.connected) socket = io(document.location.href);
+  if (!socket.connected) socket = io();
+  console.log("Connect ", socket);
   socket.on('news', onNews);
-  socket.on('config', onConfig);
+  socket.on('gameState', onGameState);
   socket.on('disconnect', onDisconnect);
-  socket.emit('playerInfo', { name: playerName });
+  player.emitPlayerInfo = function() {
+    socket.emit('playerInfo', { name: player.name, color: player.color });
+  }
+  player.emitPlayerInfo();
   //setTimeout(tic, 10);
 }
+
 function onNews(data) {
-  console.log(data);
-  var msg = document.createElement('p');
-  msg.className = 'show';
-  msg.innerHTML = data.message;
-  messageBox.appendChild(msg);
-  setTimeout(function(){ msg.className = '' }, 10);
-  setTimeout(function(){ messageBox.removeChild(msg) }, 20*1000);
+  console.log("onNews ", data);
+  messageBox.textContent = data.message;
 }
 
 var endGameMsg = 'The server connection dropped.';
-function onConfig(data) {
-  for (var k in data) { config[k] = data[k] }
-  if (data.playing===false) {
+function onGameState(data) {
+  console.log("onGameState ",data);
+  for (var k in data) { gameState[k] = data[k] }
+  if (gameState.playing===false) {
     endGameMsg = data.message || 'The server connection dropped.';
   }
 }
 
 function onDisconnect(data) {
-  connected = false;
-  console.log('disconnected', data);
+  console.log("onDisconnect ",data);
   openDialog(
     'Disconnected', endGameMsg+'<br>Do you want to reconnect?',
     'Reconnect', function() {
@@ -51,21 +63,22 @@ function onDisconnect(data) {
   });
 }
 
-function openNameDialog() {
-  var name = '';
-  openDialog(
-    'Welcome',
-    'What is your name?' +
-    '<form onsubmit="getName(); return false">' +
-    '<input id="playerNameInput" value="'+name+'"></form>',
-    'Enter', getName
-  );
-}
-function getName() {
-  playerName = playerNameInput.value;
-  dialog.style.display = 'none';
-  connect();
-}
+//
+// function openNameDialog() {
+//   var name = '';
+//   openDialog(
+//     'Welcome',
+//     'What is your name?' +
+//     '<form onsubmit="getName(); return false">' +
+//     '<input id="playerNameInput" value="'+name+'"></form>',
+//     'Enter', getName
+//   );
+// }
+// function getName() {
+//   playerName = playerNameInput.value;
+//   dialog.style.display = 'none';
+//   connect();
+// }
 
 function openDialog(title, content, btLabel, btFunc) {
   console.log('open dialog', title, dialog);
@@ -77,12 +90,14 @@ function openDialog(title, content, btLabel, btFunc) {
   console.log('open dialog done');
 }
 
-setInterval(function(){
-  // Submit mouse position only each 33ms if it was changed.
-  if (!connected || !config.playing) return;
-  //if (lastY != currentY) {
-    //socket.emit('move', { y: currentY/document.body.clientHeight });
-  //}
-}, 33);
+// setInterval(function(){
+//   // Submit mouse position only each 33ms if it was changed.
+//   if (!connected || !config.playing) return;
+//   //if (lastY != currentY) {
+//     //socket.emit('move', { y: currentY/document.body.clientHeight });
+//   //}
+// }, 33);
+//
 
-openNameDialog();
+//openNameDialog();
+connect();
