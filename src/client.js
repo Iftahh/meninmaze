@@ -1,5 +1,5 @@
 utils = require('./utils')
-var player = require('./player')
+var player = require('./thePlayer')
 
 
 /*********
@@ -30,7 +30,7 @@ function connect() {
   if (!socket.connected) socket = io();
   console.log("Connect ", socket);
   socket.on('news', onNews);
-  socket.on('gameState', onGameState);
+  socket.on('state', onGameState);
   socket.on('disconnect', onDisconnect);
   player.emitPlayerInfo = function() {
     socket.emit('playerInfo', { name: player.name, color: player.color });
@@ -41,16 +41,39 @@ function connect() {
 
 function onNews(data) {
   console.log("onNews ", data);
-  messageBox.textContent = data.message;
+  //messageBox.textContent = data.message;
+  var msg = document.createElement('p');
+  msg.className = 'show';
+  msg.textContent = data.message;
+  messageBox.appendChild(msg);
+  setTimeout(function(){ msg.className = '' }, 5*1000);
+  setTimeout(function(){ messageBox.removeChild(msg) }, 10*1000);
 }
 
 var endGameMsg = 'The server connection dropped.';
 function onGameState(data) {
   console.log("onGameState ",data);
   for (var k in data) { gameState[k] = data[k] }
-  if (gameState.playing===false) {
-    endGameMsg = data.message || 'The server connection dropped.';
+
+  switch (gameState.state) {
+
+    case 0: // waiting for players
+      if (gameState.players.length < 2) {
+        start.textContent = "Wait for more players...";
+        start.disabled = true;
+      }
+      else {
+        start.textContent = "Start";
+        start.disabled = false;
+      }
+      break;
+
+    case 1: // starting
+      start.textContent = "Starting";
+      start.disabled = true;
+      break;
   }
+
 }
 
 function onDisconnect(data) {

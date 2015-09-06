@@ -1,4 +1,5 @@
-utils = require('./utils')
+var utils = require('./utils'),
+player = require('./thePlayer');
 
 
 var KEYS={}
@@ -6,11 +7,6 @@ var updateFromKeys = function(e, realEv) {
   var code= e.keyCode;
     KEYS[code]=  e.type == 'keydown';
     //console.log('code is ',code);
-    // Player.left = KEYS[37];
-    // Player.right = KEYS[39];
-    // Player.up = KEYS[38];
-    // Player.down = KEYS[40];
-    // Player.jump = KEYS[32];
     var element = document.getElementById(code);
     if (element) {
       if (KEYS[code]) {
@@ -19,6 +15,11 @@ var updateFromKeys = function(e, realEv) {
       else {
         element.classList.remove('clicked');
       }
+      player.up = KEYS[38];
+      player.right = KEYS[39];
+      player.left = KEYS[37];
+      player.btnA = KEYS[83];
+      player.btnB = KEYS[65];
       if (realEv && realEv.preventDefault) {
         realEv.preventDefault();
       }
@@ -41,7 +42,7 @@ KEYS.bind = function() {
 
   utils.each(['mousedown','mouseup', 'touchstart','touchmove','touchend'], function(evName) {
     //document.getElementById("left")
-    left.addEventListener(evName, function(event) {
+    arrows.addEventListener(evName, function(event) {
         event.preventDefault();
         var type = event.type, x=event.clientX, y=event.clientY;
         if (type=='touchend') {

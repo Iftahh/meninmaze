@@ -16,8 +16,8 @@ module.exports = {
      * @return {float}
      * @api public
      */
-    float: function() {
-      return random();
+    float: function(max) {
+      return random() * (max || 1);
     },
     /**
      * Return a boolean.

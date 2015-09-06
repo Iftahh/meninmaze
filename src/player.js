@@ -1,67 +1,96 @@
 var camera = require('./camera');
 var rng = require('./rng');
-var KEYS = require('./input');
 var StickMan = require('./stickman'),
-  stickman = new StickMan(70,70,170);
 
-(function() {
+  stickman = new StickMan(70,70,170),
+  run = stickman.animations.run,
+  stand = stickman.animations.stand,
+  WIDTH=15, HEIGHT=25,
+  BLUE=1, RED=2;
 
-// private:
+module.exports = function Player() {
+  // private
   var x=5, y=0,
     vx=0,vy=0,
     onGround= 1,
     onWall=0,
-    WIDTH=15, HEIGHT=25,
+
     totalElapsed=0,
-    curAnim,
-    run = stickman.animations.run,
-    direction=0,
-    stand = stickman.animations.stand;
+    curAnim=0,
+    direction=0;
 
-
-function setAnim(anim) {
-  if (anim != curAnim) {
-    curAnim = anim;
-    //console.log("Setting anim to "+anim.name);
-    totalElapsed = 0;
+  function setAnim(anim) {
+    if (anim != curAnim) {
+      curAnim = anim;
+      //console.log("Setting anim to "+anim.name);
+      totalElapsed = 0;
+    }
   }
-}
 
-// public
-module.exports = {
-  color: 1, // 1 = blue, 2=red
-  name: 'Player '+rng.int(10000),
-  serialize: function() {
+  // public
+  this.name = 'Player '+rng.int(100);
+
+  this.up = this.left = this.right = this.btnA = this.btnB = 0;
+
+  this.serialize= function() {
     return {
       x: x, y:y, anim:curAnim.name, dir:direction
     }
-  },
+  };
 
-  setColor: function(col) {
+  this.setColor= function(col) {
     this.color = col;
-    stickman = new StickMan(col==1?70:170,70,col!=1?70:170);
+    stickman = new StickMan(col==1?70:170, 70, col!=1?70:170);
+    if (this.textColor != 1) {
+      this.textColor = stickman.col3;
+    }
     if (this.emitPlayerInfo) {
       this.emitPlayerInfo();
     }
-  },
+  };
+  this.setColor(BLUE);
 
-  setName: function(name) {
+  this.setName= function(name) {
     if (name != this.name) {
       this.name = name;
       if (this.emitPlayerInfo) {
         this.emitPlayerInfo();
       }
     }
-  },
+  };
 
-  setXYAD: function(xx,yy,anim,dir) {
+  this.setXYAD= function(xx,yy,anim,dir) {
     x=xx;
     y=yy;
     curAnim = stickman.animations[anim];
     direction = dir;
-  },
+  };
 
-  update: function(world, elapsed) {
+  this.draw= function(ctx,dt) {
+    ctx.save()
+    // ctx.translate(x,y)
+    // ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    // ctx.translate(WIDTH/2, HEIGHT);
+    ctx.translate(x+WIDTH/2, y+HEIGHT);
+    if (this.textColor == 1) {
+      ctx.fillStyle = "#ff0";
+    }
+    else {
+      ctx.fillStyle = textColor;
+    }
+    ctx.fillText(this.name, 0,-HEIGHT-5);
+    ctx.scale(0.15,0.15);
+    ctx.lineWidth = 15;
+    ctx.lineJoin = 'bevel';
+    if (direction) {
+      ctx.scale(-1,1);
+    }
+    curAnim.render(ctx, stickman, totalElapsed);
+
+    ctx.restore()
+  }
+
+  this.update= function(world, elapsed) {
     var step = world.cellSize/60;
 
     totalElapsed += elapsed;
@@ -70,7 +99,7 @@ module.exports = {
       vy += step;
       vy = Math.min(vy, world.cellSize);
     }
-    else*/ if (KEYS[38]) { // UP
+    else*/ if (this.up) {
       if (onGround) {
         vy -= world.jumpFromGround;
       }
@@ -84,12 +113,12 @@ module.exports = {
     vy = Math.min(vy, world.maxSpeedY);
 
     var groundAnim = run;
-    if (KEYS[39]) { // RIGHT
+    if (this.right) {
       vx += step;
       vx = Math.min(vx, world.maxSpeedX);
       direction = 0;
     }
-    else if (KEYS[37]) {  // LEFT
+    else if (this.left) {
       vx -= step;
       vx = Math.max(vx, -world.maxSpeedX);
       direction = 1;
@@ -141,18 +170,14 @@ module.exports = {
       cellYTop = Math.floor((y+vy+2) / world.cellSize),
       cellYBottom = Math.floor((HEIGHT-1+y+vy-2) / world.cellSize);
 
+    var wallSlide = 0;
     if (vx > 0) {
       //moving right
       if (!world.maze.get(cellXRight, cellYTop) || !world.maze.get(cellXRight, cellYBottom)) {
           // collided right, move to closest to left edge of cell
         x = cellXRight * world.cellSize - WIDTH-1;
         vx = 0;
-        if (KEYS[39] && vy > 0) {
-          //collided with wall, moving down, pressing left = slide down walls
-          vy *= world.wallFriction;
-          onGround = Math.random() < world.chanceJumpWall;  // small chance to be "onGround" and be able to jump
-          onWall = 1;
-        }
+        wallSlide = this.right && vy > 0;
       }
     }
     else if (vx < 0) {
@@ -160,14 +185,17 @@ module.exports = {
           // collided left, move to right edge of cell
         x = (cellXLeft+1)*world.cellSize+1;
         vx = 0;
-        if (KEYS[37] && vy > 0) {
-          //collided with wall, moving down = slide down walls
-          vy *= world.wallFriction;
-          onGround = Math.random() < world.chanceJumpWall;
-          onWall = 1;
-        }
+        wallSlide = this.left && vy > 0;
       }
     }
+
+    if (wallSlide) {
+      vy *= world.wallFriction;
+      onGround = Math.random() < world.chanceJumpWall;  // small chance to be "onGround" and be able to jump
+      onWall = 1;
+    }
+
+    // TODO: on wall animation
 
     if (!onGround) {
       if (vy > 0) {
@@ -181,32 +209,14 @@ module.exports = {
     x += vx;
     y += vy;
 
-    if (KEYS[83]) {
+    if (this.btnA) {
       camera.scale = Math.min(camera.scale + 0.05, 5);
     }
-    if (KEYS[65]) {
+    if (this.btnB) {
       camera.scale = Math.max(camera.scale - 0.05, 0.5);
     }
     camera.setTarget(x,y);
-
-  },
-
-  draw: function(ctx,dt) {
-    ctx.save()
-    // ctx.translate(x,y)
-    // ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    // ctx.translate(WIDTH/2, HEIGHT);
-    ctx.translate(x+WIDTH/2, y+HEIGHT);
-    ctx.fillText(this.name, 0,-HEIGHT-5);
-    ctx.scale(0.15,0.15);
-    ctx.lineWidth = 15;
-    ctx.lineJoin = 'bevel';
-    if (direction) {
-      ctx.scale(-1,1);
-    }
-    curAnim.render(ctx, stickman, totalElapsed);
-
-    ctx.restore()
   }
+
+  return this;
 }
-})();

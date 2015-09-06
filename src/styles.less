@@ -35,10 +35,10 @@ body {
   background: radial-gradient(rgb(254, 254, 64), rgb(234, 234, 40), rgb(146, 146, 37));
 }
 
-#left {
+#arrows {
   position:fixed;
-  bottom: 10px;
-  left: 10px;
+  bottom: 2vh;
+  left: 2vw;
 }
 
 
@@ -64,7 +64,7 @@ body {
   font-weight: 700;
 }
 
-#left span:hover, #left span.clicked, .menu>button:hover:enabled {
+#arrows span:hover, #arrows span.clicked, .menu>button:hover:enabled {
   background: linear-gradient(rgb(244, 244, 224), rgb(224, 224, 204), rgb(166, 166, 76));
   color: #fff;
 }
@@ -75,7 +75,7 @@ body {
 //   margin:0px !important;
 // }
 //
-#left span {
+#arrows span {
   /*background: rgba(55,55,55,0.9);*/
   border: 2px outset rgba(125,125,125,0.6);
   text-shadow: 0 0 2px #222;
@@ -94,7 +94,7 @@ body {
 }
 
 
-#left div {
+#arrows div {
   padding: 3px;
 }
 
@@ -120,7 +120,7 @@ body {
 }
 
 .menu {
-  transition: opacity .25s ease-in-out;
+  transition: opacity 1s ease-in-out;
   position: absolute;
   top: 10%;
   left: 30%;
@@ -151,6 +151,18 @@ body {
 #messageBox {
   padding: 2px 5px;
 }
+#messageBox p {
+  color: #FFF;
+  margin: 0;
+  opacity: 0.1 !important;
+  transition: opacity 5s ease-in-out;
+}
+
+#messageBox p.show {
+  opacity: 1 !important;
+  transition: 0s;
+}
+
 
 .game {
   transition: opacity .25s ease-in-out;

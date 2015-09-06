@@ -36,26 +36,30 @@ function findPlayer(player) {
   }
 }
 
-function playerUpdate(player) {
+function playerUpdate(player,data) {
+
+  for (k in data) {
+    player[k] = data[k];
+  }
+
   var found = findPlayer(player);
   if (!found) {
     players.push(player);
     log('Player connected', { name: player.name });
     sockets[player.id].join(id);
-    log("Dong join");
+    log("Done join");
     io.to(id).emit('news', { message: player.name+' joined the game', player: player });
-    log("Dong emit news");
+    log("Done emit news");
   }
   else {
-    log('Player updated', {name:found.name, color: found.color}, {name: player.name, color: player.color });
-    found.name = player.name;
-    found.color = player.color;
+    log('Player updated', data);
   }
 
+  log("updating state", {state:state, players:players});
   io.to(id)
     .emit('state', { state: state, players: players });
 
-  log("Dong update");
+  log("Done update");
 }
 
 function onExit(player) {
@@ -80,12 +84,10 @@ io.on('connection', function(socket) {
 
   var player = {
     id: 'p'+Math.random(),
-    name: 'player' + (players.length+1)
   };
   sockets[player.id] = socket;
-  socket.on('playerInfo', playerUpdate.bind(0, player));
+  socket.on('playerInfo', function(d) { playerUpdate(player,d)});
   socket.on('disconnect', onExit.bind(0,player));
-  playerUpdate(player);
 });
   /*if ( alonePlayer ) { // && alonePlayer.socket.id != socket.id ) {
     socket.emit('news', { message: 'Entering in a game...' });

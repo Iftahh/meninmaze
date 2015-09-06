@@ -1,12 +1,13 @@
 (function() {
 "strict mode"
 var raf = require('./raf');
+var rng = require('./rng');
 //var PARTICLE = require('./particle');
 var client = require('./client');
 
 //var AUDIO = require('./audio');
 var camera = require('./camera');
-var player = require('./player');
+var player = require('./thePlayer');
 require('./fpscounter');
 
 var ctx = canvas.getContext('2d');
@@ -27,10 +28,14 @@ window.onresize = function() {
   height=canvas.height = innerHeight;
   halfWidth = width >> 1;
   halfHeight = height >> 1;
-  ctx.font = 'italic 6pt Calibri';
+  ctx.font = 'italic 4pt Calibri';
   ctx.textAlign = 'center';
 }
 onresize();
+
+var redChecked = rng.bool();
+red.checked = redChecked;
+blue.checked = !redChecked;
 
 
 var world = {
@@ -73,7 +78,8 @@ player.setXYAD((85)/4, 0, 'fall', 0);
 
 start.onclick = function() {
   utils.each(document.querySelectorAll(".inmenu"), function(el) {
-    el.classList.remove('inmenu')
+    el.classList.remove('inmenu');
+    setTimeout(function() { el.style.display = 'none'}, 1000);
   });
   var elem = document.body;
   if (elem.requestFullscreen) {
@@ -100,6 +106,7 @@ blue.onclick = red.onclick = function() {
     player.setXYAD((width-140)/4, 0, 'fall', 1);
   }
 }
+blue.onclick();
 
 pname.value = player.name;
 pname.onkeyup = function() {
