@@ -1,5 +1,4 @@
 utils = require('./utils')
-var player = require('./thePlayer')
 
 
 /*********
@@ -17,17 +16,14 @@ var player = require('./thePlayer')
 
 
 var socket = {};
-var started = 0, callbacks;
+var started = 0, callbacks, updateInt, player;
 var gameState = {
-  p1: {
-    x: 0,
-    y: 0,
-    anim: 'stand',
-  },
+  playerId: 0,
 };
 
 function connect(cb) {
   callbacks = cb;
+  player = world.player;
 
   console.log('connecting');
   if (!socket.connected) socket = io();
@@ -35,6 +31,7 @@ function connect(cb) {
   socket.on('news', onNews);
   socket.on('state', onGameState);
   socket.on('disconnect', onDisconnect);
+  socket.on('yourId', function(d) {gameState.playerId = d.id; console.log("playerId set to ",d.id) });
   player.emitPlayerInfo = function() {
     socket.emit('playerInfo', { name: player.name, color: player.color });
   }
@@ -90,7 +87,21 @@ function onGameState(data) {
       if (started == 0) {
         callbacks.onStart();
         started = 1;
+        updateInt = setInterval(function(){
+          // Submit mouse position only each 33ms if it was changed.
+          if (gameState.state != 2) {
+            clearInterval(updateInt);
+            updateInt = 0;
+            return;
+          }
+          console.log("updating server: ",player.serialize());
+          socket.emit('update', {
+            id: gameState.playerId,
+            player: player.serialize()
+          })
+        }, 33);
       }
+      callbacks.updateGame();
       break;
     }
   }
@@ -104,36 +115,10 @@ function startGame() {
 
 function onDisconnect(data) {
   console.log("onDisconnect ",data);
+  gameState.state = 0;
   callbacks.onDisconnect(endGameMsg);
-
 }
 
-//
-// function openNameDialog() {
-//   var name = '';
-//   openDialog(
-//     'Welcome',
-//     'What is your name?' +
-//     '<form onsubmit="getName(); return false">' +
-//     '<input id="playerNameInput" value="'+name+'"></form>',
-//     'Enter', getName
-//   );
-// }
-// function getName() {
-//   playerName = playerNameInput.value;
-//   dialog.style.display = 'none';
-//   connect();
-// }
-// setInterval(function(){
-//   // Submit mouse position only each 33ms if it was changed.
-//   if (!connected || !config.playing) return;
-//   //if (lastY != currentY) {
-//     //socket.emit('move', { y: currentY/document.body.clientHeight });
-//   //}
-// }, 33);
-//
-
-//openNameDialog();
 
 
 module.exports = {

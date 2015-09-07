@@ -1,8 +1,8 @@
-var utils = require('./utils'),
-player = require('./thePlayer');
+var utils = require('./utils');
 
 
-var KEYS={}
+var KEYS={};
+
 var updateFromKeys = function(e, realEv) {
   var code= e.keyCode;
     KEYS[code]=  e.type == 'keydown';
@@ -15,6 +15,7 @@ var updateFromKeys = function(e, realEv) {
       else {
         element.classList.remove('clicked');
       }
+      var player = world.player;
       player.up = KEYS[38];
       player.right = KEYS[39];
       player.left = KEYS[37];

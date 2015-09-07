@@ -7,7 +7,7 @@ var client = require('./client');
 var Maze = require('./Maze');
 //var AUDIO = require('./audio');
 var camera = require('./camera');
-var player = require('./thePlayer');
+var Player = require('./Player');
 require('./fpscounter');
 
 var ctx = canvas.getContext('2d');
@@ -46,11 +46,19 @@ var world = {
   jumpFromAir: 0.1, // smaller gravity when pressing up even in air
   chanceJumpWall: 0.2,  // chance to be able to jump from
   wallFriction: 0.7,
+  otherPlayers:{},
+  player: new Player()
 }
+var player = world.player;
+player.textColor = 1;
+window.world = world;
 
 function game(elapsed) {
-
     player.update(world, elapsed);
+    for (var k in world.otherPlayers) {
+      world.otherPlayers[k].update(world, elapsed);
+    }
+    player.setCamera();
     camera.update();
 
     ctx.translate(halfWidth, halfHeight); // zoom to mid of screen
@@ -59,7 +67,9 @@ function game(elapsed) {
 
     world.maze.draw(ctx, world.cellSize);
     player.draw(ctx);
-
+    for (var k in world.otherPlayers) {
+      world.otherPlayers[k].draw(ctx);
+    }
 }
 
 
@@ -71,8 +81,6 @@ function menu(elapsed) {
 }
 
 var state = menu;
-player.setXYAD((85)/4, 0, 'fall', 0);
-
 
 start.onclick = function() {
 
@@ -91,12 +99,12 @@ start.onclick = function() {
 
 blue.onclick = red.onclick = function() {
   if (blue.checked) {
-    player.setXYAD((80)/4, 0, 'fall', 0);
+    player.deserialize({x:(80)/4, y:0, anim:'fall', dir:0})
     player.setColor(1);
   }
   else {
     player.setColor(2);
-    player.setXYAD((width-140)/4, 0, 'fall', 1);
+    player.deserialize({x:(width-140)/4, y:0, anim:'fall', dir:1})
   }
 }
 blue.onclick();
@@ -140,6 +148,23 @@ client.connect({
         document.location.reload();// TODO: prpoer reconnect
         dialog.style.display = 'none';
     });
+  },
+
+  updateGame: function() {
+    utils.each(client.gameState.players, function(p) {
+      if (p.id != client.gameState.playerId) {
+        // other player
+        if (!world.otherPlayers[p.id]) {
+          world.otherPlayers[p.id] = new Player();
+          world.otherPlayers[p.id].setColor(p.color);
+          world.otherPlayers[p.id].name = p.name;
+        }
+        if (p.player) {
+          world.otherPlayers[p.id].deserialize(p.player);
+        }
+      }
+    })
+
   },
 
   onEnd: function() {

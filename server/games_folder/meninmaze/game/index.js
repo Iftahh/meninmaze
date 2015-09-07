@@ -44,7 +44,7 @@ function playerStarted(player,data) {
     .emit('news', { message: player.name+' started the game!' })
     .emit('state', { state: state, players: players });
 
-  var repeat = 6;
+  var repeat = 2;
   var repeater = function() {
     if (state != GAME_STARTING) {
       return;
@@ -53,6 +53,15 @@ function playerStarted(player,data) {
     if (repeat == 0) {
       state = GAME_STARTED;
       io.to(id).emit('state', { state: state, mazeX:48, mazeY:40, maze:maze });
+      setTimeout(function gameTick() {
+        if (state != GAME_STARTED) return;
+        io.to(id).emit('state', {
+          state:state,
+          players:players
+        });
+        setTimeout(gameTick, 33);
+      }, 33);
+
     }
     else {
       io.to(id).emit('news', { message: 'Game starting in '+repeat+'!' });
@@ -63,7 +72,17 @@ function playerStarted(player,data) {
   maze = Maze(24,20);
 }
 
-function playerUpdate(player,data) {
+function playerUpdate(player, data) {
+  if (state != GAME_STARTED) {
+    // expect player updates when game is ongoing
+    return;
+  }
+  for (k in data) {
+    player[k] = data[k];
+  }
+}
+
+function playerInfo(player,data) {
   if (state != WAITING_FOR_GAME_START) {
     // allow changing player name/color only before game start
     return;
@@ -96,7 +115,9 @@ function onExit(player) {
   log('Player exit', { name: player.name, color: player.color });
   var found = findPlayer(player);
   if (found) {
-    players.splice(players.indexOf(found));
+    players.splice(players.indexOf(found),1);
+    sockets[player.id].disconnect();
+    delete sockets[player.id];
     var msg = '';
     if (players.length < 2) {
       msg = player.name+' left the game, not enough players remained - THE END';
@@ -110,7 +131,6 @@ function onExit(player) {
   }
 }
 
-//  setTimeout(gameTick, 1000);
 
 io.on('connection', function(socket) {
   log('New connection', socket.id);
@@ -123,81 +143,9 @@ io.on('connection', function(socket) {
     id: 'p'+Math.random(),
   };
   sockets[player.id] = socket;
-  socket.on('playerInfo', function(d) { playerUpdate(player,d)});
+  socket.on('playerInfo', function(d) { playerInfo(player,d)});
   socket.on('startGame', function(d) { playerStarted(player,d)});
+  socket.on('update', function(d) { playerUpdate(player,d)});
   socket.on('disconnect', onExit.bind(0,player));
+  socket.emit('yourId', {id: player.id});
 });
-  /*if ( alonePlayer ) { // && alonePlayer.socket.id != socket.id ) {
-    socket.emit('news', { message: 'Entering in a game...' });
-    var firstPlayer = alonePlayer;
-    alonePlayer = null;
-    // Give some time to player info to arrive.
-    setTimeout(function(){ new Game(firstPlayer, newPlayer); }, 500);
-    //new Game(alonePlayer, newPlayer);
-  } else {
-    socket.emit('news', { message: 'Waiting for a pair...' });
-    alonePlayer = newPlayer;
-  }*/
-
-
-function gameTick() {
-  io.to(id).emit('state', {
-    state:state,
-    players:players
-  });
-  setTimeout(gameTick, 33);
-};
-
-/*
-Game.prototype.end = function() {
-  log('End game', { id:this.id, players:this.players });
-  this.players[0].exit();
-  this.players[1].exit();
-  delete games[this.id];
-};
-
-
-Player.prototype.joinGame = function(game) {
-  this.game = game;
-  this.points = 0;
-  this.socket.join(game.id);
-  this.socket.on('move', this.onMove.bind(this));
-  this.socket.emit('news', { message: 'My key', key:this.whoInTheGame().me.key });
-};
-
-
-Player.prototype.whoInTheGame = function() {
-  if (!this.game) return {};
-  var players = this.game.players;
-  if ( players[0] == this ) {
-    return {
-      me: {obj:players[0], key:'player1'},
-      other: {obj:players[1], key:'player2'}
-    };
-  } else {
-    return {
-      me: {obj:players[1], key:'player2'},
-      other: {obj:players[0], key:'player1'}
-    };
-  }
-};
-
-Player.prototype.onExit = function() {
-  log("onExit ")
-  if (this==alonePlayer) alonePlayer = null;
-  if (!this.game) return;
-  var otherPlayer = this.whoInTheGame().other.obj;
-  otherPlayer.socket.emit('news', {
-    message: 'Your pair leaves the game.',
-    kickerId: this.socket.id
-  });
-  this.game.end('Your pair leaves the game.');
-};
-
-Player.prototype.exit = function(msg) {
-  if (!this.game) return;
-  this.socket.emit('config', { playing:false, message:msg });
-  this.socket.disconnect();
-  this.game = null;
-};
-*/

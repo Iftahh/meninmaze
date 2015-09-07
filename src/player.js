@@ -2,9 +2,6 @@ var camera = require('./camera');
 var rng = require('./rng');
 var StickMan = require('./stickman'),
 
-  stickman = new StickMan(70,70,170),
-  run = stickman.animations.run,
-  stand = stickman.animations.stand,
   WIDTH=15, HEIGHT=25,
   BLUE=1, RED=2;
 
@@ -14,6 +11,9 @@ module.exports = function Player() {
     vx=0,vy=0,
     onGround= 1,
     onWall=0,
+    stickman = new StickMan(70,70,170),
+    run = stickman.animations.run,
+    stand = stickman.animations.stand,
 
     totalElapsed=0,
     curAnim=0,
@@ -34,9 +34,28 @@ module.exports = function Player() {
 
   this.serialize= function() {
     return {
-      x: x, y:y, anim:curAnim.name, dir:direction
+      x: x, y:y, vx:vx, vy:vy,
+      anim:curAnim.name, dir:direction,
+      up: this.up, left: this.left, right: this.right
     }
   };
+  this.setCamera = function() {
+    camera.setTarget(x,y);
+  };
+  
+  this.deserialize= function(p) {
+    if (undefined !== p.x) x=p.x;
+    if (undefined !== p.y) y=p.y;
+    if (undefined !== p.vx) vx=p.vx;
+    if (undefined !== p.vy) vy=p.vy;
+    if (undefined !== p.anim) setAnim(stickman.animations[p.anim]);
+    if (undefined !== p.dir) direction = p.dir;
+    if (undefined !== p.up) up=p.up;
+    if (undefined !== p.left) left=p.left;
+    if (undefined !== p.right) right=p.right;
+  };
+
+
 
   this.setColor= function(col) {
     this.color = col;
@@ -59,13 +78,6 @@ module.exports = function Player() {
     }
   };
 
-  this.setXYAD= function(xx,yy,anim,dir) {
-    x=xx;
-    y=yy;
-    curAnim = stickman.animations[anim];
-    direction = dir;
-  };
-
   this.draw= function(ctx,dt) {
     ctx.save()
     // ctx.translate(x,y)
@@ -76,7 +88,7 @@ module.exports = function Player() {
       ctx.fillStyle = "#ff0";
     }
     else {
-      ctx.fillStyle = textColor;
+      ctx.fillStyle = this.textColor;
     }
     ctx.fillText(this.name, 0,-HEIGHT-5);
     ctx.scale(0.15,0.15);
@@ -217,7 +229,6 @@ module.exports = function Player() {
       camera.scale = Math.max(camera.scale - 0.05, 0.5);
       console.log("scale "+camera.scale);
     }
-    camera.setTarget(x,y);
   }
 
   return this;
