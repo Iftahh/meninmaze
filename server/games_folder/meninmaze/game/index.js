@@ -36,8 +36,37 @@ function findPlayer(player) {
   }
 }
 
-function playerUpdate(player,data) {
+function playerStarted(player,data) {
+  log("Game starting!");
+  state = GAME_STARTING;
 
+  io.to(id)
+    .emit('news', { message: player.name+' started the game!' })
+    .emit('state', { state: state, players: players });
+
+  var repeat = 6;
+  var repeater = function() {
+    if (state != GAME_STARTING) {
+      return;
+    }
+    repeat--;
+    if (repeat == 0) {
+      state = GAME_STARTED;
+      io.to(id).emit('state', { state: state });
+    }
+    else {
+      io.to(id).emit('news', { message: 'Game starting in '+repeat+'!' });
+    }
+    setTimeout(repeater, 1000);
+  };
+  repeater();
+}
+
+function playerUpdate(player,data) {
+  if (state != WAITING_FOR_GAME_START) {
+    // allow changing player name/color only before game start
+    return;
+  }
   for (k in data) {
     player[k] = data[k];
   }
@@ -67,9 +96,16 @@ function onExit(player) {
   var found = findPlayer(player);
   if (found) {
     players.splice(players.indexOf(found));
+    var msg = '';
+    if (players.length < 2) {
+      msg = player.name+' left the game, not enough players remained - THE END';
+      log(msg);
+      state = WAITING_FOR_GAME_START;
+      io.to(id)
+        .emit('state', { state: state, players: players, endMsg:msg });
+    }
     io.to(id)
       .emit('news', { message: player.name+' left the game'})
-      .emit('state', { state: state, players: players });
   }
 }
 
@@ -87,6 +123,7 @@ io.on('connection', function(socket) {
   };
   sockets[player.id] = socket;
   socket.on('playerInfo', function(d) { playerUpdate(player,d)});
+  socket.on('startGame', function(d) { playerStarted(player,d)});
   socket.on('disconnect', onExit.bind(0,player));
 });
   /*if ( alonePlayer ) { // && alonePlayer.socket.id != socket.id ) {
@@ -127,17 +164,6 @@ Player.prototype.joinGame = function(game) {
   this.socket.emit('news', { message: 'My key', key:this.whoInTheGame().me.key });
 };
 
-Player.prototype.inkPoints = function() {
-  this.points++;
-};
-
-Player.prototype.onMove = function(data){
-};
-
-Player.prototype.onPlayerInfo = function(data){
-  this.name = data.name;
-  if(this.game) this.game.updateNames();
-};
 
 Player.prototype.whoInTheGame = function() {
   if (!this.game) return {};

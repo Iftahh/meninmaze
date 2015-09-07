@@ -77,23 +77,18 @@ player.setXYAD((85)/4, 0, 'fall', 0);
 
 
 start.onclick = function() {
-  utils.each(document.querySelectorAll(".inmenu"), function(el) {
-    el.classList.remove('inmenu');
-    setTimeout(function() { el.style.display = 'none'}, 1000);
-  });
-  var elem = document.body;
-  if (elem.requestFullscreen) {
-    elem.requestFullscreen();
-  } else if (elem.msRequestFullscreen) {
-    elem.msRequestFullscreen();
-  } else if (elem.mozRequestFullScreen) {
-    elem.mozRequestFullScreen();
-  } else if (elem.webkitRequestFullscreen) {
-    elem.webkitRequestFullscreen();
-  }
-  input.bind();
-  world.maze = Maze(24,20);
-  state = game;
+
+  // var elem = document.body;
+  // if (elem.requestFullscreen) {
+  //   elem.requestFullscreen();
+  // } else if (elem.msRequestFullscreen) {
+  //   elem.msRequestFullscreen();
+  // } else if (elem.mozRequestFullScreen) {
+  //   elem.mozRequestFullScreen();
+  // } else if (elem.webkitRequestFullscreen) {
+  //   elem.webkitRequestFullscreen();
+  // }
+  client.startGame();
 }
 
 blue.onclick = red.onclick = function() {
@@ -112,6 +107,58 @@ pname.value = player.name;
 pname.onkeyup = function() {
   player.setName(pname.value);
 }
+
+
+
+function openDialog(title, content, btLabel, btFunc) {
+  console.log('open dialog', title, dialog);
+  dialog.style.display = 'block';
+  dialogTitle.innerHTML = title;
+  dialogContent.innerHTML = content;
+  dialogBtFunc.innerHTML = btLabel;
+  dialogBtFunc.onclick = btFunc;
+  console.log('open dialog done');
+}
+
+
+
+client.connect({
+  onStart: function() {
+    utils.each(document.querySelectorAll(".inmenu"), function(el) {
+      el.classList.remove('inmenu');
+      // el.classList.add('inmenu-back')
+      setTimeout(function() { el.style.display = 'none'}, 1000);
+    });
+    input.bind();
+    world.maze = Maze(24,20);
+    state = game;
+  },
+
+  onDisconnect: function(endGameMsg) {
+    openDialog(
+      'Disconnected', endGameMsg+'<br>Do you want to reconnect?',
+      'Reconnect', function() {
+        document.location.reload();// TODO: prpoer reconnect
+        dialog.style.display = 'none';
+    });
+  },
+
+  onEnd: function() {
+    // todo: replace with undo of onStart
+    // utils.each(document.querySelectorAll(".inmenu-back"), function(el) {
+    //   el.classList.remove('inmenu-back');
+    //   el.classList.add('inmenu');
+    //   el.style.display = ''
+    // });
+
+    openDialog(
+      'Game Ended', client.gameState.endMsg+'<br>Do you want to play again?',
+      'Play Again', function() {
+        document.location.reload();
+        dialog.style.display = 'none';
+    });
+  }
+});
 
 raf.start(function(elapsed) {
 

@@ -17,6 +17,7 @@ var player = require('./thePlayer')
 
 
 var socket = {};
+var started = 0, callbacks;
 var gameState = {
   p1: {
     x: 0,
@@ -25,7 +26,9 @@ var gameState = {
   },
 };
 
-function connect() {
+function connect(cb) {
+  callbacks = cb;
+
   console.log('connecting');
   if (!socket.connected) socket = io();
   console.log("Connect ", socket);
@@ -51,6 +54,7 @@ function onNews(data) {
 }
 
 var endGameMsg = 'The server connection dropped.';
+
 function onGameState(data) {
   console.log("onGameState ",data);
   for (var k in data) { gameState[k] = data[k] }
@@ -58,6 +62,10 @@ function onGameState(data) {
   switch (gameState.state) {
 
     case 0: // waiting for players
+      if (started == 1) {
+        callbacks.onEnd();
+        started = 0;
+      }
       if (gameState.players.length < 2) {
         start.textContent = "Wait for more players...";
         start.disabled = true;
@@ -71,19 +79,32 @@ function onGameState(data) {
     case 1: // starting
       start.textContent = "Starting";
       start.disabled = true;
+      if (started == 1) {
+        callbacks.onEnd();
+        started = 0;
+      }
       break;
+
+    case 2: // started
+      if (started == 0) {
+        callbacks.onStart();
+        started = 1;
+      }
+      break;
+    }
   }
 
+// Player pressed "start" -
+// cb = callback to call when the game actually starts
+function startGame() {
+  console.log("Game starting!");
+  socket.emit('startGame');
 }
 
 function onDisconnect(data) {
   console.log("onDisconnect ",data);
-  openDialog(
-    'Disconnected', endGameMsg+'<br>Do you want to reconnect?',
-    'Reconnect', function() {
-      document.location.reload();
-      dialog.style.display = 'none';
-  });
+  callbacks.onDisconnect(endGameMsg);
+
 }
 
 //
@@ -102,17 +123,6 @@ function onDisconnect(data) {
 //   dialog.style.display = 'none';
 //   connect();
 // }
-
-function openDialog(title, content, btLabel, btFunc) {
-  console.log('open dialog', title, dialog);
-  dialog.style.display = 'block';
-  dialogTitle.innerHTML = title;
-  dialogContent.innerHTML = content;
-  dialogBtFunc.innerHTML = btLabel;
-  dialogBtFunc.onclick = btFunc;
-  console.log('open dialog done');
-}
-
 // setInterval(function(){
 //   // Submit mouse position only each 33ms if it was changed.
 //   if (!connected || !config.playing) return;
@@ -123,4 +133,10 @@ function openDialog(title, content, btLabel, btFunc) {
 //
 
 //openNameDialog();
-connect();
+
+
+module.exports = {
+  startGame: startGame,
+  connect: connect,
+  gameState: gameState
+}

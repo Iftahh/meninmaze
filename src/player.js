@@ -211,9 +211,11 @@ module.exports = function Player() {
 
     if (this.btnA) {
       camera.scale = Math.min(camera.scale + 0.05, 5);
+      console.log("scale "+camera.scale);
     }
     if (this.btnB) {
       camera.scale = Math.max(camera.scale - 0.05, 0.5);
+      console.log("scale "+camera.scale);
     }
     camera.setTarget(x,y);
   }
