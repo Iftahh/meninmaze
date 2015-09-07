@@ -1,7 +1,7 @@
 'use strict';
 
 var io = require('sandbox-io');
-
+var Maze = require('./dfs_maze_gen');
 
 /*********
 1. player 1 connect - get game state, join game if possible
@@ -52,7 +52,7 @@ function playerStarted(player,data) {
     repeat--;
     if (repeat == 0) {
       state = GAME_STARTED;
-      io.to(id).emit('state', { state: state });
+      io.to(id).emit('state', { state: state, mazeX:48, mazeY:40, maze:maze });
     }
     else {
       io.to(id).emit('news', { message: 'Game starting in '+repeat+'!' });
@@ -60,6 +60,7 @@ function playerStarted(player,data) {
     setTimeout(repeater, 1000);
   };
   repeater();
+  maze = Maze(24,20);
 }
 
 function playerUpdate(player,data) {

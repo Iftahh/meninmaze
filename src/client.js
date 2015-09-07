@@ -49,8 +49,9 @@ function onNews(data) {
   msg.className = 'show';
   msg.textContent = data.message;
   messageBox.appendChild(msg);
-  setTimeout(function(){ msg.className = '' }, 5*1000);
-  setTimeout(function(){ messageBox.removeChild(msg) }, 10*1000);
+  var opac = 1;
+  var opacInt= setInterval(function(){ opac *= 0.995; msg.style.opacity=opac; }, 20);
+  setTimeout(function(){ messageBox.removeChild(msg); clearInterval(opacInt); }, 5*1000);
 }
 
 var endGameMsg = 'The server connection dropped.';

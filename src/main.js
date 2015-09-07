@@ -4,7 +4,7 @@ var raf = require('./raf');
 var rng = require('./rng');
 //var PARTICLE = require('./particle');
 var client = require('./client');
-
+var Maze = require('./Maze');
 //var AUDIO = require('./audio');
 var camera = require('./camera');
 var player = require('./thePlayer');
@@ -12,8 +12,6 @@ require('./fpscounter');
 
 var ctx = canvas.getContext('2d');
 
-
-var Maze = require('./dfs_maze_gen');
 
 var input = require('./input');
 
@@ -130,7 +128,8 @@ client.connect({
       setTimeout(function() { el.style.display = 'none'}, 1000);
     });
     input.bind();
-    world.maze = Maze(24,20);
+    var gs = client.gameState;
+    world.maze = Maze(gs.mazeX, gs.mazeY, gs.maze);
     state = game;
   },
 

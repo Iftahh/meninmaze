@@ -20,13 +20,13 @@
       <label style="color:red"><input type="radio" name="color" id="red">Red</label><br>
       <br>
 
-      <label>Show on screen controls? <input id="showcontrols" type="checkbox"></label><br>
+      <label>Opaque on-screen controls? <input id="showcontrols" type="checkbox" checked></label><br>
       <button id="start" disabled >Loading...</button>
       <div id="messageBox"></div>
     </div>
 
     <canvas id="canvas"></canvas>
-    <div id="arrows" class="game hide">
+    <div id="arrows" class="game">
       <div class="h1">
         <span class="w1 hidden"></span><span class="w2" id="38">&#8593;</span>
       </div>
@@ -34,8 +34,8 @@
         <span class="w1" id="37">&#8592;</span><span class="w2 hidden"></span><span class="w1" id="39">&#8594;</span>
       </div>
     </div>
-    <div class="button hit game hide" id="83">Hit</div>
-    <div class="button block game hide" id="65">Block</div>
+    <div class="button hit game" id="83">Hit</div>
+    <div class="button block game" id="65">Block</div>
 
     <div id="dialog" style="display:none">
       <h2 id="dialogTitle">Dialog Title</h2>
