@@ -54,7 +54,6 @@ function onNews(data) {
 var endGameMsg = 'The server connection dropped.';
 
 function onGameState(data) {
-  console.log("onGameState ",data);
   for (var k in data) { gameState[k] = data[k] }
 
   switch (gameState.state) {
@@ -94,7 +93,6 @@ function onGameState(data) {
             updateInt = 0;
             return;
           }
-          console.log("updating server: ",player.serialize());
           socket.emit('update', {
             id: gameState.playerId,
             player: player.serialize()

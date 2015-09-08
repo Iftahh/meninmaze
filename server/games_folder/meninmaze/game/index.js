@@ -96,19 +96,15 @@ function playerInfo(player,data) {
     players.push(player);
     log('Player connected', { name: player.name });
     sockets[player.id].join(id);
-    log("Done join");
     io.to(id).emit('news', { message: player.name+' joined the game', player: player });
-    log("Done emit news");
   }
   else {
     log('Player updated', data);
   }
 
-  log("updating state", {state:state, players:players});
   io.to(id)
     .emit('state', { state: state, players: players });
 
-  log("Done update");
 }
 
 function onExit(player) {
