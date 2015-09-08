@@ -85,6 +85,7 @@ function onGameState(data) {
     case 2: // started
       if (started == 0) {
         callbacks.onStart();
+        console.log("Game started ",data);
         started = 1;
         updateInt = setInterval(function(){
           // Submit mouse position only each 33ms if it was changed.

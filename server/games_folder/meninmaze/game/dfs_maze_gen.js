@@ -92,11 +92,11 @@ function generateMaze(MAZE_X, MAZE_Y) {
     // maybe instead of maps use array and binary search in case need to check contains?
     //  http://oli.me.uk/2013/06/08/searching-javascript-arrays-with-a-binary-search/
     var places = {
-      horizDE: {},  // DE = dead end
-      topDE: {},
-      bottomDE: {},
-      hallway: {},
-      chute: {},
+      horizDE: [],  // DE = dead end
+      topDE: [],
+      bottomDE: [],
+      hallway: [],
+      chute: [],
     };
 
     for (var y=0; y<MAZE_Y; y++ ) {
@@ -105,21 +105,21 @@ function generateMaze(MAZE_X, MAZE_Y) {
         if (maze[ofs]) {
           if (maze[ofs+1] && maze[ofs-1]) { // both left and right
             if (maze[ofs+2] && maze[ofs-2] && !maze[ofs+MAZE_X])
-              places.hallway[ofs] = 1;
+              places.hallway.push(ofs);
           }
           else if (maze[ofs+1] || maze[ofs-1]) {  // only left or only right
             // check not corner
             if (!maze[ofs+MAZE_X] && !maze[ofs-MAZE_X])
-              places.horizDE[ofs] = 1;
+              places.horizDE.push(ofs);
           }
           else if (maze[ofs+MAZE_X] && maze[ofs-MAZE_X]) {
-            places.chute[ofs] = 1; // both up and down
+            places.chute.push(ofs); // both up and down
           }
           else if (maze[ofs-MAZE_X]) {
-            places.bottomDE[ofs] = 1;
+            places.bottomDE.push(ofs);
           }
           else if (maze[ofs+MAZE_X]) {
-            places.topDE[ofs] = 1;
+            places.topDE.push(ofs);
           }
         }
       }
@@ -131,7 +131,9 @@ function generateMaze(MAZE_X, MAZE_Y) {
   // TODO:  Maybe no need for BFS?  without cycles DFS is good distance measurment as well
   // TODO: Floyd Marshal for all pairs
   //       https://mgechev.github.io/javascript-algorithms/graphs_shortest-path_floyd-warshall.js.html
-  function BFS(ofs0) {
+  // zeroDist = array of offsets of cells which will have min distance
+  // result = maze of distance from the
+  function BFS(zeroDist) {
     // reset
     for (var y=0; y<MAZE_Y; y++) {
       for (var x=0; x<MAZE_X; x++) {
@@ -141,8 +143,8 @@ function generateMaze(MAZE_X, MAZE_Y) {
         }
       }
     }
-    var ofs=ofs0,
-        stack = [ofs],
+    var ofs,
+        stack = zeroDist.slice(),
         d,
         fu = function(ofs) {
           if (maze[ofs]==1) {
@@ -152,7 +154,7 @@ function generateMaze(MAZE_X, MAZE_Y) {
         };
 
     while (stack.length) {
-      ofs = stack.pop();
+      ofs = stack.shift();
       d = maze[ofs]+1;
       fu(ofs+1);
       fu(ofs-1);

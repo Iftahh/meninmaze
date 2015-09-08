@@ -44,7 +44,8 @@ function playerStarted(player,data) {
     .emit('news', { message: player.name+' started the game!' })
     .emit('state', { state: state, players: players });
 
-  var repeat = 2;
+  // repeat "game starting in X seconds, for 'repeat' times, then start the game"
+  var repeat = 6;
   var repeater = function() {
     if (state != GAME_STARTING) {
       return;
@@ -52,7 +53,13 @@ function playerStarted(player,data) {
     repeat--;
     if (repeat == 0) {
       state = GAME_STARTED;
-      io.to(id).emit('state', { state: state, mazeX:48, mazeY:40, maze:maze });
+      var blueInd = Math.random()*2|0;
+      io.to(id).emit('state', { state: state,
+        mazeX:48, mazeY:40, maze:maze,
+        red:bulbs[1-blueInd], blue:bulbs[blueInd],
+        bulbs:bulbs.slice(2) });
+
+      // start updating the game state -
       setTimeout(function gameTick() {
         if (state != GAME_STARTED) return;
         io.to(id).emit('state', {
@@ -69,7 +76,35 @@ function playerStarted(player,data) {
     setTimeout(repeater, 1000);
   };
   repeater();
-  maze = Maze(24,20);
+
+  // generate a maze with enough potential places for bulb lights
+  var potentials = [];
+  while (potentials.length < 11) {
+    log("Generating Maze");
+    maze = Maze(24,20);
+    potentials = maze.places.bottomDE.concat(maze.places.horizDE);
+  }
+
+  // find places for bulb lights - farthest places of the potentials starting with from the first
+  var bulbs = [];
+  var maxOfs= Math.random()*potentials.length|0;
+  bulbs.push(potentials.splice(maxOfs,1)[0]);
+  while (bulbs.length < 7) {
+    maze.BFS(bulbs); // calculate distance from bulbs so far
+    // find the farthest potential place, add repeat
+    var max=0;
+    for (var i=0; i<potentials.length; i++) {
+      if (maze[potentials[i]] > max) {
+        max = maze[potentials[i]];
+        maxOfs = i;
+      }
+    }
+    bulbs.push(potentials.splice(maxOfs,1)[0]);
+  }
+
+  // found 7 distant places with bulbs - 1st place will be blue team, 2nd place will be red team
+
+
 }
 
 function playerUpdate(player, data) {

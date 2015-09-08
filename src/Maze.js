@@ -1,8 +1,11 @@
 
 
-function generateMaze(MAZE_X, MAZE_Y, maze) {
+function generateMaze(MAZE_X, MAZE_Y, maze, bulbs) {
 
-
+  var bulbs_dict = {}
+  for (var i=0; i<bulbs.length; i++) {
+    bulbs_dict[bulbs[i]] = 1;
+  }
   // TODO: add keys and locks, eg http://www.squidi.net/three/entry.php?id=4
 
   function drawMaze(ctx, cellSize) {
@@ -23,11 +26,11 @@ function generateMaze(MAZE_X, MAZE_Y, maze) {
               x0 = -1;
             }
 
-/*            if (maze.places.bottomDE[ofs]) {
+            if (bulbs_dict[ofs]) {
                ctx.fillStyle = "#faa";
                ctx.fillRect(x*cellSize+small, y*cellSize+small, small,small);
                ctx.fillStyle = "#eef";
-            }*/
+            }
           }
           else {
             // found rock, update x0

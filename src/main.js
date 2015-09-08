@@ -126,7 +126,22 @@ function openDialog(title, content, btLabel, btFunc) {
   console.log('open dialog done');
 }
 
+var updateGame = function() {
+  utils.each(client.gameState.players, function(p) {
+    if (p.id != client.gameState.playerId) {
+      // other player
+      if (!world.otherPlayers[p.id]) {
+        world.otherPlayers[p.id] = new Player();
+        world.otherPlayers[p.id].setColor(p.color);
+        world.otherPlayers[p.id].name = p.name;
+      }
+      if (p.player) {
+        world.otherPlayers[p.id].deserialize(p.player);
+      }
+    }
+  })
 
+}
 
 client.connect({
   onStart: function() {
@@ -137,7 +152,15 @@ client.connect({
     });
     input.bind();
     var gs = client.gameState;
-    world.maze = Maze(gs.mazeX, gs.mazeY, gs.maze);
+    world.maze = Maze(gs.mazeX, gs.mazeY, gs.maze, gs.bulbs);
+
+    updateGame();
+    var blue_loc = {x: (gs.blue % gs.mazeX)*world.cellSize,  y: (gs.blue/gs.mazeX|0)*world.cellSize },
+        red_loc = {x: (gs.red % gs.mazeX)*world.cellSize,  y: (gs.red/gs.mazeX|0)*world.cellSize };
+    player.deserialize(player.color == 1 ? blue_loc : red_loc);
+    for (var k in world.otherPlayers) {
+      world.otherPlayers[k].deserialize(player.color == 1 ? blue_loc : red_loc);
+    }
     state = game;
   },
 
@@ -150,22 +173,7 @@ client.connect({
     });
   },
 
-  updateGame: function() {
-    utils.each(client.gameState.players, function(p) {
-      if (p.id != client.gameState.playerId) {
-        // other player
-        if (!world.otherPlayers[p.id]) {
-          world.otherPlayers[p.id] = new Player();
-          world.otherPlayers[p.id].setColor(p.color);
-          world.otherPlayers[p.id].name = p.name;
-        }
-        if (p.player) {
-          world.otherPlayers[p.id].deserialize(p.player);
-        }
-      }
-    })
-
-  },
+  updateGame: updateGame,
 
   onEnd: function() {
     // todo: replace with undo of onStart
