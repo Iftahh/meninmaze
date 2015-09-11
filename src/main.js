@@ -46,7 +46,9 @@ var world = {
   jumpFromAir: 0.1, // smaller gravity when pressing up even in air
   chanceJumpWall: 0.2,  // chance to be able to jump from
   wallFriction: 0.7,
-  player:  new Player()
+  player:  new Player(),
+  otherPlayers:{},
+  bulbsDict: {}
 }
 var player = world.player;
 player.textColor = 1;
@@ -93,6 +95,12 @@ function menu(elapsed) {
   player.update(world, elapsed);
   ctx.scale(4,4);
   ctx.fillStyle = "#ff0";
+  for (var k in world.otherPlayers) {
+    var oplayer =  world.otherPlayers[k];
+    world.otherPlayers[k].update(world, elapsed);
+    world.otherPlayers[k].draw(ctx);
+  }
+  ctx.translate(0,10);
   player.draw(ctx);
 }
 
@@ -128,31 +136,65 @@ function openDialog(title, content, btLabel, btFunc) {
   dialogContent.innerHTML = content;
   dialogBtFunc.innerHTML = btLabel;
   dialogBtFunc.onclick = btFunc;
-  console.log('open dialog done');
+}
+
+function ofsToXY(ofs) {
+  return {x: (ofs % client.gameState.mazeX)*world.cellSize,  y: (ofs/client.gameState.mazeX|0)*world.cellSize, ofs:ofs }
 }
 
 var updateGame = function() {
   utils.each(client.gameState.players, function(p) {
     if (p.id != client.gameState.playerId) {
       // other player
+      var origColor = -1;
       if (!world.otherPlayers[p.id]) {
         world.otherPlayers[p.id] = new Player();
         world.otherPlayers[p.id].setColor(p.color);
         world.otherPlayers[p.id].name = p.name;
+      }
+      else {
+         origColor = world.otherPlayers[p.id].color;
+        world.otherPlayers[p.id].setColor(p.color);
+        world.otherPlayers[p.id].name = p.name;
+      }
+      if (origColor != p.color && state == menu) {
+        var bluePlayers = 0, redPlayers=0;
+        for (var k in world.otherPlayers) {
+          if (world.otherPlayers[k].color == 1) {bluePlayers++} else {redPlayers++}
+        }
+        if (p.color == 1) {
+          p.player = {x:(88)/4+10*bluePlayers, y:0, anim:'stand', dir:0}
+        }
+        else {
+          p.player = {x:(world.width-148)/4-10*redPlayers, y:0, anim:'stand', dir:1}
+        }
       }
       if (p.player) {
         world.otherPlayers[p.id].deserialize(p.player);
       }
     }
   })
+  for (var pId in world.otherPlayers) {
+    var found = false;
+    for (var i=0; i<client.gameState.players.length; i++) {
+      if (client.gameState.players[i].id == pId) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      // this player isn't online anymore
+      delete  world.otherPlayers[pId];
+    }
+  }
 
   for (var b in client.gameState.bulbs) {
-    world.bulbsDict[b].color = client.gameState.bulbs[b];
+    if (world.bulbsDict[b])
+      world.bulbsDict[b].color = client.gameState.bulbs[b];
+    else {
+      world.bulbsDict[b] = new Bulb(ofsToXY(b), world.cellSize);
+    }
   }
-}
-
-function ofsToXY(ofs) {
-  return {x: (ofs % client.gameState.mazeX)*world.cellSize,  y: (ofs/client.gameState.mazeX|0)*world.cellSize, ofs:ofs }
 }
 
 client.connect({

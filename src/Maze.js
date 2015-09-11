@@ -102,6 +102,8 @@ function generateMaze(MAZE_X, MAZE_Y, maze, bulbs_dict) {
   maze.get = function(x,y) {
     return maze[y*MAZE_X+x];
   }
+  maze.MAZE_X = MAZE_X;
+  //maze.MAZE_Y = MAZE_Y;
   return maze;
 }
 

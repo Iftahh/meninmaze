@@ -17,6 +17,7 @@ module.exports = function Player() {
     stickman = new StickMan(70,70,170),
     run = stickman.animations.run,
     stand = stickman.animations.stand,
+    notMoving = 0,
 
     totalElapsed=0,
     curAnim=0,
@@ -97,7 +98,7 @@ module.exports = function Player() {
       ctx.fillStyle = this.textColor;
     }
     ctx.fillText(this.name, 0,-HEIGHT-5);
-    ctx.scale(0.15,0.15);
+    ctx.scale(0.15, 0.15);
     ctx.lineWidth = 15;
     ctx.lineJoin = 'bevel';
     if (direction) {
@@ -108,37 +109,75 @@ module.exports = function Player() {
     ctx.restore()
   }
 
-  this.update= function(world, elapsed) {
-    var step = world.cellSize/60;
+  this.reverseMovement = function(world,elapsed) {
+    // update reverse movement
+    var maze = world.maze,
+      cellX = Math.floor(x / world.cellSize),
+      cellY = Math.floor(y / world.cellSize),
+      ofs = maze.xyToOfs(cellX,cellY);
 
-    if (this.btnB && reverseStack.length) {
-      // update reverse movement
-      var cellX = Math.floor(x / world.cellSize),
-        cellY = Math.floor(y / world.cellSize),
-        ofs = world.maze.xyToOfs(cellX,cellY);
-
-      if (ofs == reverseStack[reverseStack.length-1]) {
-        reverseStack.pop();
-        if (reverseStack.length == 0) {
-          this.update(world, elapsed); // stop reversing
-          return;
+    if (ofs == reverseStack[reverseStack.length-1]) {
+      reverseStack.pop();
+      reverseDirections = [];
+      if (reverseStack.length == 0) {
+        this.update(world, elapsed); // stop reversing
+        return;
+      }
+    }
+    totalElapsed -= elapsed;
+    if (!reverseDirections.length) {
+      // generate reverse directions to next intersection
+      // from next intersection, to current location
+      maze.BFS([reverseStack[reverseStack.length-1]], ofs);
+      var ofs0 = ofs;
+      while (ofs != reverseStack[reverseStack.length-1]) {
+        var score = maze[ofs] - 1;
+        if (maze[ofs+1] == score) {
+          ofs = ofs+1;
+          reverseDirections.push([1,0, ofs]);
+        } else if (maze[ofs-1] == score) {
+          ofs = ofs-1;
+          reverseDirections.push([-1,0, ofs]);
+        }
+        else if (maze[ofs-maze.MAZE_X] == score) {
+          ofs = ofs-maze.MAZE_X;
+          reverseDirections.push([0,-1, ofs]);
+        }
+        else if (maze[ofs+maze.MAZE_X] == score) {
+          ofs = ofs+maze.MAZE_X;
+          reverseDirections.push([0,1, ofs]);
+        }
+        else {
+          // todo remove
+          console.log("can't find direction!!!");
+          debugger;
+          break;
         }
       }
-      totalElapsed -= elapsed;
-      if (!reverseDirections.length) {
-        // generate reverse directions to next intersection
-        // from next intersection, to current location
-        world.maze.BFS([reverseStack[reverseStack.length-1]], ofs);
-      }
-
-
-
-
-      return;
+      ofs = ofs0;
     }
 
+    var dirToMove = reverseDirections[0];
+    if (dirToMove[2] == ofs) {
+      reverseDirections.shift();
+      dirToMove = reverseDirections[0];
+    }
 
+    // follow the reverse direct
+
+    direction = dirToMove[0] > 0; // opposite of normal move - move right and look to the left
+    vx = dirToMove[0]*2*world.maxSpeedX;
+    vy = dirToMove[1]*2*world.maxSpeedY;
+
+    x += vx;
+    y += vy;
+
+  }
+
+  this.normalMove = function(world,elapsed) {
     totalElapsed += elapsed;
+    var step = world.cellSize/60;
+
     // update speed
     /*if (KEYS[40]) {
       vy += step;
@@ -253,11 +292,6 @@ module.exports = function Player() {
     x += vx;
     y += vy;
 
-    if (this.btnA) {
-      camera.scale = Math.min(camera.scale + 0.05, 5);
-      console.log("scale "+camera.scale);
-    }
-
     // keep track of intersections for undo later
     if (world.intersections && world.player == this) {
       var cellX = Math.floor(x / world.cellSize),
@@ -270,6 +304,30 @@ module.exports = function Player() {
         if (reverseStack.length > 300) {
           reverseStack.shift();
         }
+      }
+    }
+  }
+
+  this.update= function(world, elapsed) {
+    if (this.btnB && reverseStack.length) {
+      this.reverseMovement(world,elapsed);
+    }
+    else {
+      this.normalMove(world,elapsed);
+    }
+
+    if (world.player == this) {
+      if (Math.abs(vx) > 0 || Math.abs(vy) > 0) {
+        camera.scale = Math.min(camera.scale + 0.1, 1.7);
+        //console.log("scale "+camera.scale);
+        notMoving = 0;
+      }
+      else {
+        notMoving += elapsed;
+        if (notMoving > 3) {
+          camera.scale = Math.max(camera.scale - 0.004, 0.5);
+        }
+        //console.log("scale "+camera.scale);
       }
     }
   }

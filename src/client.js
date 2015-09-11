@@ -58,6 +58,8 @@ var endGameMsg = 'The server connection dropped.';
 
 function onGameState(data) {
   for (var k in data) { gameState[k] = data[k] }
+  console.log("game state ",data);
+  callbacks.updateGame();
 
   switch (gameState.state) {
 
@@ -103,7 +105,11 @@ function onGameState(data) {
           })
         }, 33);
       }
-      callbacks.updateGame();
+      break;
+
+    case 3: // already started
+      start.textContent = "Join";
+      start.disabled = false;
       break;
     }
   }
@@ -112,11 +118,15 @@ function onGameState(data) {
 // cb = callback to call when the game actually starts
 function startGame() {
   console.log("Game starting!");
+  if (gameState.state == 3) {
+    onGameState({state:2});
+    return;
+  }
   socket.emit('startGame');
 }
 
 function onDisconnect(data) {
-  console.log("onDisconnect ",data);
+  console.log("onDisconnect ",data || '');
   gameState.state = 0;
   callbacks.onDisconnect(endGameMsg);
 }

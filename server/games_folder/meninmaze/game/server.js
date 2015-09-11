@@ -21,10 +21,15 @@ var
   WAITING_FOR_GAME_START = 0,
   GAME_STARTING = 1,
   GAME_STARTED = 2,
+  ALREADY_STARTED = 3,
 
+  MAZE_X = 48, // must be divisible by 2
+  MAZE_Y = 40,// must be divisible by 2
   players= [],
   bulbs = {},
   sockets={},
+  redStart=-1,
+  blueStart=-1,
   maze= [],
   id = 'g'+Math.random(),  // TODO: support multiple games
   state = WAITING_FOR_GAME_START;
@@ -57,10 +62,13 @@ function playerStarted(player,data) {
     if (repeat <= 0 && bulbsOfs.length > 5) {
       state = GAME_STARTED;
       var blueInd = Math.random()*2|0;
-      io.to(id).emit('state', { state: state,
-        mazeX:48, mazeY:40, maze:maze,
+      redStart = bulbsOfs[1-blueInd];
+      blueStart = bulbsOfs[blueInd];
+      io.to(id).emit('state', {
+        state: state,
+        mazeX:MAZE_X, mazeY:MAZE_Y, maze:maze,
         //places: maze.places,
-        red:bulbsOfs[1-blueInd], blue:bulbsOfs[blueInd],
+        red: redStart, blue:blueStart,
         bulbs:bulbs });
 
       // start updating the game state -
@@ -86,7 +94,7 @@ function playerStarted(player,data) {
   var potentials = [];
   while (potentials.length < 11) {
     log("Generating Maze");
-    maze = Maze(24,20);
+    maze = Maze(MAZE_X/2,MAZE_Y/2);
     potentials = maze.places.bottomDE.concat(maze.places.horizDE);
   }
   // find places for bulb lights - farthest places of the potentials starting with from the first
@@ -183,4 +191,17 @@ io.on('connection', function(socket) {
   socket.on('disconnect', onExit.bind(0,player));
 
   socket.emit('yourId', {id: player.id, color: color});
+
+  if (state == GAME_STARTED) {
+    socket.emit('news', {message: "Game already started, join or wait?"})
+    socket.emit('state', {
+      state: ALREADY_STARTED,
+      mazeX:MAZE_X, mazeY:MAZE_Y, maze:maze,
+      red: redStart, blue:blueStart,
+      bulbs:bulbs,
+      players:players });
+  }
+  else {
+    socket.emit('state', { state: state, players: players });
+  }
 });
