@@ -23,9 +23,10 @@ var
   GAME_STARTED = 2,
 
   players= [],
+  bulbs = {},
   sockets={},
   maze= [],
-  id = 'g'+Math.random(),
+  id = 'g'+Math.random(),  // TODO: support multiple games
   state = WAITING_FOR_GAME_START;
 
 function findPlayer(player) {
@@ -45,26 +46,29 @@ function playerStarted(player,data) {
     .emit('state', { state: state, players: players });
 
   // repeat "game starting in X seconds, for 'repeat' times, then start the game"
-  var repeat = 6;
+  var repeat = 3;//6 ;
+  var bulbsOfs = [];
+
   var repeater = function() {
     if (state != GAME_STARTING) {
       return;
     }
     repeat--;
-    if (repeat == 0) {
+    if (repeat <= 0 && bulbsOfs.length > 5) {
       state = GAME_STARTED;
       var blueInd = Math.random()*2|0;
       io.to(id).emit('state', { state: state,
         mazeX:48, mazeY:40, maze:maze,
-        red:bulbs[1-blueInd], blue:bulbs[blueInd],
-        bulbs:bulbs.slice(2) });
+        red:bulbsOfs[1-blueInd], blue:bulbsOfs[blueInd],
+        bulbs:bulbs });
 
       // start updating the game state -
       setTimeout(function gameTick() {
         if (state != GAME_STARTED) return;
         io.to(id).emit('state', {
           state:state,
-          players:players
+          players:players,
+          bulbs: bulbs
         });
         setTimeout(gameTick, 33);
       }, 33);
@@ -84,13 +88,11 @@ function playerStarted(player,data) {
     maze = Maze(24,20);
     potentials = maze.places.bottomDE.concat(maze.places.horizDE);
   }
-
   // find places for bulb lights - farthest places of the potentials starting with from the first
-  var bulbs = [];
   var maxOfs= Math.random()*potentials.length|0;
-  bulbs.push(potentials.splice(maxOfs,1)[0]);
-  while (bulbs.length < 7) {
-    maze.BFS(bulbs); // calculate distance from bulbs so far
+  bulbsOfs.push(potentials.splice(maxOfs,1)[0]);
+  while (bulbsOfs.length < 7) {
+    maze.BFS(bulbsOfs); // calculate distance from bulbs so far
     // find the farthest potential place, add repeat
     var max=0;
     for (var i=0; i<potentials.length; i++) {
@@ -99,12 +101,13 @@ function playerStarted(player,data) {
         maxOfs = i;
       }
     }
-    bulbs.push(potentials.splice(maxOfs,1)[0]);
+    bulbsOfs.push(potentials.splice(maxOfs,1)[0]);
   }
-
   // found 7 distant places with bulbs - 1st place will be blue team, 2nd place will be red team
-
-
+  bulbs = {}
+  for (var i=2; i<bulbsOfs.length; i++) {
+    bulbs[bulbsOfs[i]] = 0; // color white
+  }
 }
 
 function playerUpdate(player, data) {
@@ -177,6 +180,8 @@ io.on('connection', function(socket) {
   socket.on('playerInfo', function(d) { playerInfo(player,d)});
   socket.on('startGame', function(d) { playerStarted(player,d)});
   socket.on('update', function(d) { playerUpdate(player,d)});
+  socket.on('bulbUpdate', function(d) { log("bulb "+d.ofs+" updated to "+d.color); bulbs[d.ofs] = d.color ; });
   socket.on('disconnect', onExit.bind(0,player));
+
   socket.emit('yourId', {id: player.id});
 });

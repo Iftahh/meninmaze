@@ -1,16 +1,15 @@
 
 
-function generateMaze(MAZE_X, MAZE_Y, maze, bulbs) {
+function generateMaze(MAZE_X, MAZE_Y, maze, bulbs_dict) {
 
-  var bulbs_dict = {}
-  for (var i=0; i<bulbs.length; i++) {
-    bulbs_dict[bulbs[i]] = 1;
-  }
+  // var bulbs_dict = {}
+  // for (var i=0; i<bulbs.length; i++) {
+  //   bulbs_dict[bulbs[i]] = 1;
+  // }
   // TODO: add keys and locks, eg http://www.squidi.net/three/entry.php?id=4
 
   function drawMaze(ctx, cellSize) {
       ctx.fillStyle = "#eef";
-      var small = cellSize/3;
       //ctx.fillStyle = "#000";
       //ctx.fillRect(0,0, W, H);
       //BFS(MAZE_X*MAZE_Y-MAZE_X);
@@ -27,9 +26,7 @@ function generateMaze(MAZE_X, MAZE_Y, maze, bulbs) {
             }
 
             if (bulbs_dict[ofs]) {
-               ctx.fillStyle = "#faa";
-               ctx.fillRect(x*cellSize+small, y*cellSize+small, small,small);
-               ctx.fillStyle = "#eef";
+              bulbs_dict[ofs].draw(ctx, cellSize)
             }
           }
           else {

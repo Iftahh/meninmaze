@@ -1,7 +1,7 @@
 var utils = require('./utils');
 
 
-var KEYS={};
+var KEYS={}, player;
 
 var updateFromKeys = function(e, realEv) {
   var code= e.keyCode;
@@ -15,7 +15,6 @@ var updateFromKeys = function(e, realEv) {
       else {
         element.classList.remove('clicked');
       }
-      var player = world.player;
       player.up = KEYS[38];
       player.right = KEYS[39];
       player.left = KEYS[37];
@@ -36,8 +35,8 @@ showcontrols.onclick = function() {
   })
 }
 
-
-KEYS.bind = function() {
+KEYS.bind = function(world) {
+  player = world.player;
   document.addEventListener('keydown', updateFromKeys);
   document.addEventListener('keyup', updateFromKeys);
 

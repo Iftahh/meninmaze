@@ -8,6 +8,7 @@ var Maze = require('./Maze');
 //var AUDIO = require('./audio');
 var camera = require('./camera');
 var Player = require('./Player');
+var Bulb = require('./Bulb');
 require('./fpscounter');
 
 var ctx = canvas.getContext('2d');
@@ -46,17 +47,18 @@ var world = {
   jumpFromAir: 0.1, // smaller gravity when pressing up even in air
   chanceJumpWall: 0.2,  // chance to be able to jump from
   wallFriction: 0.7,
-  otherPlayers:{},
-  player: new Player()
+  player:  new Player()
 }
 var player = world.player;
 player.textColor = 1;
-window.world = world;
 
 function game(elapsed) {
     player.update(world, elapsed);
     for (var k in world.otherPlayers) {
       world.otherPlayers[k].update(world, elapsed);
+    }
+    for (var b in world.bulbsDict) {
+      world.bulbsDict[b].update(world, elapsed);
     }
     player.setCamera();
     camera.update();
@@ -141,6 +143,13 @@ var updateGame = function() {
     }
   })
 
+  for (var b in client.gameState.bulbs) {
+  world.bulbsDict[b].color = client.gameState.bulbs[b];
+  }
+}
+
+function ofsToXY(ofs) {
+  return {x: (ofs % client.gameState.mazeX)*world.cellSize,  y: (ofs/client.gameState.mazeX|0)*world.cellSize, ofs:ofs }
 }
 
 client.connect({
@@ -150,13 +159,23 @@ client.connect({
       // el.classList.add('inmenu-back')
       setTimeout(function() { el.style.display = 'none'}, 1000);
     });
-    input.bind();
+    input.bind(world);
     var gs = client.gameState;
-    world.maze = Maze(gs.mazeX, gs.mazeY, gs.maze, gs.bulbs);
+
+    world.otherPlayers={};
+    world.bulbsDict= {};
+
+    for (var b in gs.bulbs) {
+      world.bulbsDict[b] = new Bulb(ofsToXY(b), world.cellSize);
+    }
+    // world.bulbsDict[gs.blue] = new Bulb(ofsToXY(gs.blue), world.cellSize);
+    // world.bulbsDict[gs.red] = new Bulb(ofsToXY(gs.red), world.cellSize);
+
+    world.maze = Maze(gs.mazeX, gs.mazeY, gs.maze, world.bulbsDict);
 
     updateGame();
-    var blue_loc = {x: (gs.blue % gs.mazeX)*world.cellSize,  y: (gs.blue/gs.mazeX|0)*world.cellSize },
-        red_loc = {x: (gs.red % gs.mazeX)*world.cellSize,  y: (gs.red/gs.mazeX|0)*world.cellSize };
+    var blue_loc = ofsToXY(gs.blue),
+        red_loc = ofsToXY(gs.red);
     player.deserialize(player.color == 1 ? blue_loc : red_loc);
     for (var k in world.otherPlayers) {
       world.otherPlayers[k].deserialize(player.color == 1 ? blue_loc : red_loc);
@@ -190,12 +209,12 @@ client.connect({
         dialog.style.display = 'none';
     });
   }
-});
+}, world);
 
 raf.start(function(elapsed) {
 
   // Clear the screen
-  //ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "#222";
   ctx.fillRect(0, 0, width, height);
 

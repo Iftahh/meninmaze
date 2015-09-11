@@ -64,10 +64,6 @@ body {
   font-weight: 700;
 }
 
-#arrows span:hover, #arrows span.clicked, .menu>button:hover:enabled {
-  background: linear-gradient(rgb(244, 244, 224), rgb(224, 224, 204), rgb(166, 166, 76));
-  color: #fff;
-}
 //
 // .clicked {
 //   border: 3px inset rgba(225,225,225,0.9) !important;
@@ -77,15 +73,14 @@ body {
 //
 #arrows span {
   /*background: rgba(55,55,55,0.9);*/
+  display: inline-block;
   border: 2px outset rgba(125,125,125,0.6);
   text-shadow: 0 0 2px #222;
   border-radius: 3px;
-  height: 100%;
-  display: inline-block;
   background: linear-gradient(rgb(224, 224, 224), rgb(204, 204, 204), rgb(126, 126, 126));
   box-shadow: 3px 3px 6px rgba(0,0,0,0.5);
-  margin: 1px;
   text-align:center;
+  margin: 1px;
   vertical-align: middle;
   font-size: 24px;
   color: #ffb;
@@ -136,18 +131,39 @@ body {
 }
 
 #start {
-  font-size: 1.6vw;
-  border-radius: 5px;
   padding: 10px 20px;
   margin: 20px;
-  background: linear-gradient(rgb(224, 224, 224), rgb(204, 204, 204), rgb(126, 126, 126));
   box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
   cursor:not-allowed;
+  font-size: 1.6vw;
+  border: 2px outset rgba(125,125,125,0.6);
+  border-radius: 3px;
+  background: linear-gradient(rgb(224, 224, 224), rgb(204, 204, 204), rgb(126, 126, 126));
+
 }
-#start:enabled {
+
+#dialogBtFunc {
+  font-size: 1.6vw;
+  border: 1px outset rgba(125,125,125,0.6);
+  border-radius: 3px;
+  background: linear-gradient(rgb(224, 224, 224), rgb(204, 204, 204), rgb(126, 126, 126));
+  display: inline-block;
+  margin-top: 10px;
+  padding: 5px 10px;
+}
+
+#start:enabled, #dialogBtFunc {
   box-shadow: 3px 3px 6px rgba(0,0,0,0.5);
   cursor:pointer;
 }
+
+#arrows span:hover, #arrows span.clicked, #dialogBtFunc:hover, #start:hover:enabled {
+  background: linear-gradient(rgb(244, 244, 224), rgb(224, 224, 204), rgb(166, 166, 76));
+  color: #fff;
+  text-shadow: 0 0 2px #222;
+}
+
+
 #messageBox {
   padding: 2px 5px;
 }
@@ -209,14 +225,4 @@ body {
   background: #FFF;
   font-size: 20px;
   text-align: center;
-}
-
-#dialogBtFunc {
-  cursor: pointer;
-  display: inline-block;
-  border: 2px solid #DDD;
-  background: #888;
-  color: #EEE;
-  margin-top: 10px;
-  padding: 5px 10px;
 }

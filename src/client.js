@@ -21,7 +21,7 @@ var gameState = {
   playerId: 0,
 };
 
-function connect(cb) {
+function connect(cb, world) {
   callbacks = cb;
   player = world.player;
 
@@ -123,5 +123,8 @@ function onDisconnect(data) {
 module.exports = {
   startGame: startGame,
   connect: connect,
-  gameState: gameState
+  gameState: gameState,
+  updateBulb: function(b) {
+    socket.emit('bulbUpdate', {ofs: b.ofs, color: b.color})
+  }
 }

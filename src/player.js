@@ -42,7 +42,7 @@ module.exports = function Player() {
   this.setCamera = function() {
     camera.setTarget(x,y);
   };
-  
+
   this.deserialize= function(p) {
     if (undefined !== p.x) x=p.x;
     if (undefined !== p.y) y=p.y;
@@ -55,7 +55,10 @@ module.exports = function Player() {
     if (undefined !== p.right) right=p.right;
   };
 
-
+  this.isCollide = function(left, top, width, height) {
+    return (Math.abs(left - x) * 2 < (width + WIDTH)) &&
+         (Math.abs(top - y) * 2 < (height + HEIGHT));
+  }
 
   this.setColor= function(col) {
     this.color = col;
