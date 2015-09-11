@@ -59,6 +59,7 @@ function playerStarted(player,data) {
       var blueInd = Math.random()*2|0;
       io.to(id).emit('state', { state: state,
         mazeX:48, mazeY:40, maze:maze,
+        //places: maze.places,
         red:bulbsOfs[1-blueInd], blue:bulbsOfs[blueInd],
         bulbs:bulbs });
 
@@ -107,6 +108,9 @@ function playerStarted(player,data) {
   bulbs = {}
   for (var i=2; i<bulbsOfs.length; i++) {
     bulbs[bulbsOfs[i]] = 0; // color white
+  }
+  for (var i=0; i<maze.cycles.length; i++) {
+    bulbs[maze.cycles[i]] = 1;
   }
 }
 
@@ -165,16 +169,14 @@ function onExit(player) {
   }
 }
 
-
+var color = 1;
 io.on('connection', function(socket) {
   log('New connection', socket.id);
-  if (state == GAME_STARTED) {
-      socket.emit('news', {message: "Sorry, can't join game - it already started"})
-      return;
-  }
 
+  color = 3-color; // toggle 1,2
   var player = {
     id: 'p'+Math.random(),
+    color: color
   };
   sockets[player.id] = socket;
   socket.on('playerInfo', function(d) { playerInfo(player,d)});
@@ -183,5 +185,5 @@ io.on('connection', function(socket) {
   socket.on('bulbUpdate', function(d) { log("bulb "+d.ofs+" updated to "+d.color); bulbs[d.ofs] = d.color ; });
   socket.on('disconnect', onExit.bind(0,player));
 
-  socket.emit('yourId', {id: player.id});
+  socket.emit('yourId', {id: player.id, color: color});
 });

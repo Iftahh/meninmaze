@@ -11,6 +11,9 @@ module.exports = function Player() {
     vx=0,vy=0,
     onGround= 1,
     onWall=0,
+    reverseStack = [], // stack of intersections visited for reverse powerup
+    reverseDirections = [], // directions of cells to step through to get to the next intersection
+
     stickman = new StickMan(70,70,170),
     run = stickman.animations.run,
     stand = stickman.animations.stand,
@@ -108,6 +111,13 @@ module.exports = function Player() {
   this.update= function(world, elapsed) {
     var step = world.cellSize/60;
 
+    if (this.btnB && reverseStack.length) {
+      // update reverse
+      totalElapsed -= elapsed;
+      return;
+    }
+
+
     totalElapsed += elapsed;
     // update speed
     /*if (KEYS[40]) {
@@ -149,7 +159,6 @@ module.exports = function Player() {
       // walk, run, brakes, stand,  these should be set only if on ground and not sliding on wall
       setAnim(groundAnim);
     }
-
 
     // COLLISION DETECTION
 
@@ -228,9 +237,20 @@ module.exports = function Player() {
       camera.scale = Math.min(camera.scale + 0.05, 5);
       console.log("scale "+camera.scale);
     }
-    if (this.btnB) {
-      camera.scale = Math.max(camera.scale - 0.05, 0.5);
-      console.log("scale "+camera.scale);
+
+    // keep track of intersections for undo later
+    if (world.intersections && world.player == this) {
+      var cellX = Math.floor(x / world.cellSize),
+        cellY = Math.floor(y / world.cellSize),
+        ofs = world.maze.xyToOfs(cellX,cellY);
+      if (world.intersections[ofs] && reverseStack[reverseStack.length-1] != ofs) {
+        console.log("Pushing "+cellX+","+cellY+"  ofs:"+ofs+" to reverse stack");
+        reverseStack.push(ofs);
+        // not likely the stack will increase to this size but I hate having arrays growing to infinity
+        if (reverseStack.length > 300) {
+          reverseStack.shift();
+        }
+      }
     }
   }
 

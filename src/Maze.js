@@ -58,8 +58,47 @@ function generateMaze(MAZE_X, MAZE_Y, maze, bulbs_dict) {
       }
   }
 
+  // zeroDist = array of offsets of cells which will have min distance
+  // target = offset to stop when reached
+  // result = maze of distance from the
+  maze.BFS = function(zeroDist, target) {
+    // reset
+    for (var y=0; y<MAZE_Y; y++) {
+      for (var x=0; x<MAZE_X; x++) {
+        var ofs = MAZE_X*y+x;
+        if (maze[ofs]) {
+          maze[ofs] = 1;
+        }
+      }
+    }
+    var ofs,
+        stack = zeroDist.slice(),
+        d,
+        fu = function(ofs) {
+          if (maze[ofs]==1) {
+            maze[ofs]=d;
+            if (ofs == target) {
+              return;
+            }
+            stack.push(ofs)
+          }
+        };
+
+    while (stack.length) {
+      ofs = stack.shift();
+      d = maze[ofs]+1;
+      fu(ofs+1);
+      fu(ofs-1);
+      fu(ofs+MAZE_X);
+      fu(ofs-MAZE_X);
+    }
+  }
+
 
   maze.draw = drawMaze;
+  maze.xyToOfs = function(x,y) {
+    return y*MAZE_X+x;
+  }
   maze.get = function(x,y) {
     return maze[y*MAZE_X+x];
   }

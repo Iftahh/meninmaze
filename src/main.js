@@ -21,9 +21,6 @@ var input = require('./input');
 var totalElapsed = 0;
 
 
-var redChecked = rng.bool();
-red.checked = redChecked;
-blue.checked = !redChecked;
 
 
 blue.onclick = red.onclick = function() {
@@ -61,6 +58,7 @@ window.onresize = function() {
   world.height=canvas.height = innerHeight;
   halfWidth = world.width >> 1;
   halfHeight = world.height >> 1;
+  // for some reason the ctx resets on resize.. so redo
   ctx.font = 'italic 4pt Calibri';
   ctx.textAlign = 'center';
   blue.onclick();
@@ -149,7 +147,7 @@ var updateGame = function() {
   })
 
   for (var b in client.gameState.bulbs) {
-  world.bulbsDict[b].color = client.gameState.bulbs[b];
+    world.bulbsDict[b].color = client.gameState.bulbs[b];
   }
 }
 
@@ -158,6 +156,14 @@ function ofsToXY(ofs) {
 }
 
 client.connect({
+  onId: function(d) {
+    if (d.color == 1) {
+      blue.click();
+    }
+    else {
+      red.click();
+    }
+  },
   onStart: function() {
     utils.each(document.querySelectorAll(".inmenu"), function(el) {
       el.classList.remove('inmenu');
@@ -177,6 +183,22 @@ client.connect({
     // world.bulbsDict[gs.red] = new Bulb(ofsToXY(gs.red), world.cellSize);
 
     world.maze = Maze(gs.mazeX, gs.mazeY, gs.maze, world.bulbsDict);
+
+    world.intersections = {}
+    // find intersection points
+    var ofs =0, maze = world.maze;
+    for (var y=0; y<gs.mazeY; y++ ) {
+      for (var x=0; x<gs.mazeX; x++ ) {
+        if (gs.maze[ofs]) {
+          var n = !!maze[ofs+1] + !!maze[ofs-1] + !!maze[ofs+gs.mazeX] + !!maze[ofs-gs.mazeX];
+          if (n > 2) {
+            world.intersections[ofs] = 1;
+          }
+        }
+        ofs++;
+      }
+    }
+
 
     updateGame();
     var blue_loc = ofsToXY(gs.blue),

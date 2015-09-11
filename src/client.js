@@ -31,7 +31,10 @@ function connect(cb, world) {
   socket.on('news', onNews);
   socket.on('state', onGameState);
   socket.on('disconnect', onDisconnect);
-  socket.on('yourId', function(d) {gameState.playerId = d.id; console.log("playerId set to ",d.id) });
+  socket.on('yourId', function(data) {
+    gameState.playerId = data.id;
+    cb.onId(data);
+  });
   player.emitPlayerInfo = function() {
     socket.emit('playerInfo', { name: player.name, color: player.color });
   }

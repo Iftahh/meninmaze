@@ -25,7 +25,44 @@ function generateMaze(MAZE_X, MAZE_Y) {
        // duplicate horizontal to give more chance for horizontal pathes
       neighbors = [0,1, 0,-1, 1,0,1,0,1,0,   -1,0,-1,0,-1,0];
 
-// maze is 4 times bigger than MAXE_X x MAZE_Y - so do twice each row, and add two cells for each X
+
+  // TODO: Floyd Marshal for all pairs
+  //       https://mgechev.github.io/javascript-algorithms/graphs_shortest-path_floyd-warshall.js.html
+  // zeroDist = array of offsets of cells which will have min distance
+  // result = maze of distance from the
+  // BFS is used to find far away places (eg. to place bulbs and players far apart)
+  function BFS(zeroDist) {
+    // reset
+    for (var y=0; y<MAZE_Y; y++) {
+      for (var x=0; x<MAZE_X; x++) {
+        var ofs = MAZE_X*y+x;
+        if (maze[ofs]) {
+          maze[ofs] = 1;
+        }
+      }
+    }
+    var ofs,
+        stack = zeroDist.slice(),
+        d,
+        fu = function(ofs) {
+          if (maze[ofs]==1) {
+            maze[ofs]=d;
+            stack.push(ofs)
+          }
+        };
+
+    while (stack.length) {
+      ofs = stack.shift();
+      d = maze[ofs]+1;
+      fu(ofs+1);
+      fu(ofs-1);
+      fu(ofs+MAZE_X);
+      fu(ofs-MAZE_X);
+    }
+  }
+
+  // GENERATE MAZE:
+// maze is 4 times bigger than MAZE_X x MAZE_Y - so do twice each row, and add two cells for each X
 
   for (y=0; y<MAZE_Y; y++) {
     for (t=0; t<2; t++) {
@@ -37,8 +74,10 @@ function generateMaze(MAZE_X, MAZE_Y) {
     }
   }
 
-  x = rndInt(MAZE_X);
-  y=rndInt(MAZE_Y);
+  var x0 = rndInt(MAZE_X);
+    y0=rndInt(MAZE_Y);
+  x=x0;
+  y=y0;
 
   MAZE_X *= 2;
   MAZE_Y *= 2;
@@ -87,25 +126,48 @@ function generateMaze(MAZE_X, MAZE_Y) {
     }
   }
 
+  BFS([MAZE_X*y0+x0]);
+
+  maze.cycles = [];
+  // add a few cycles
+  for (var cycles=0; cycles<4; cycles++) {
+    var ofs = rndInt(maze.length);
+    while(1) {
+      if (!maze[ofs] && maze[ofs+1] && maze[ofs-1] && !maze[ofs-MAZE_X] && !maze[ofs+MAZE_X]) {
+        // found a vertical wall, check if the locations on the sides are far away to travel
+        // - if so a good place to insert a cycle
+        if (Math.abs(maze[ofs+1] - maze[ofs-1]) > 40) {
+          // found a good place to add a cycle
+          maze[ofs] = AIR;
+          log("adding cycle at ofset "+ofs );
+          maze.cycles.push(ofs);
+          break;
+        }
+      }
+      // not found try next offset
+      ofs = (ofs+1)%maze.length;
+    }
+  }
+
 
   function findPlaces() {
     // maybe instead of maps use array and binary search in case need to check contains?
     //  http://oli.me.uk/2013/06/08/searching-javascript-arrays-with-a-binary-search/
     var places = {
       horizDE: [],  // DE = dead end
-      topDE: [],
+      // topDE: [],
       bottomDE: [],
-      hallway: [],
-      chute: [],
+      // hallway: [],
+      // chute: [],
     };
 
+    var ofs =0;
     for (var y=0; y<MAZE_Y; y++ ) {
       for (var x=0; x<MAZE_X; x++ ) {
-        var ofs = MAZE_X*y+x;
         if (maze[ofs]) {
           if (maze[ofs+1] && maze[ofs-1]) { // both left and right
-            if (maze[ofs+2] && maze[ofs-2] && !maze[ofs+MAZE_X])
-              places.hallway.push(ofs);
+            // if (maze[ofs+2] && maze[ofs-2] && !maze[ofs+MAZE_X])
+              // places.hallway.push(ofs);
           }
           else if (maze[ofs+1] || maze[ofs-1]) {  // only left or only right
             // check not corner
@@ -113,55 +175,21 @@ function generateMaze(MAZE_X, MAZE_Y) {
               places.horizDE.push(ofs);
           }
           else if (maze[ofs+MAZE_X] && maze[ofs-MAZE_X]) {
-            places.chute.push(ofs); // both up and down
+            // places.chute.push(ofs); // both up and down
           }
           else if (maze[ofs-MAZE_X]) {
             places.bottomDE.push(ofs);
           }
-          else if (maze[ofs+MAZE_X]) {
-            places.topDE.push(ofs);
-          }
+          // else if (maze[ofs+MAZE_X]) {
+          //   places.topDE.push(ofs);
+          // }
         }
+        ofs++
       }
     }
     return places;
   }
 
-
-  // TODO:  Maybe no need for BFS?  without cycles DFS is good distance measurment as well
-  // TODO: Floyd Marshal for all pairs
-  //       https://mgechev.github.io/javascript-algorithms/graphs_shortest-path_floyd-warshall.js.html
-  // zeroDist = array of offsets of cells which will have min distance
-  // result = maze of distance from the
-  function BFS(zeroDist) {
-    // reset
-    for (var y=0; y<MAZE_Y; y++) {
-      for (var x=0; x<MAZE_X; x++) {
-        var ofs = MAZE_X*y+x;
-        if (maze[ofs]) {
-          maze[ofs] = 1;
-        }
-      }
-    }
-    var ofs,
-        stack = zeroDist.slice(),
-        d,
-        fu = function(ofs) {
-          if (maze[ofs]==1) {
-            maze[ofs]=d;
-            stack.push(ofs)
-          }
-        };
-
-    while (stack.length) {
-      ofs = stack.shift();
-      d = maze[ofs]+1;
-      fu(ofs+1);
-      fu(ofs-1);
-      fu(ofs+MAZE_X);
-      fu(ofs-MAZE_X);
-    }
-  }
 
   // TODO: add keys and locks, eg http://www.squidi.net/three/entry.php?id=4
 
