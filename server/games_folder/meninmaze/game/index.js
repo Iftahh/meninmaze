@@ -154,7 +154,7 @@ function onExit(player) {
     delete sockets[player.id];
     var msg = '';
     if (players.length < 2) {
-      msg = player.name+' left the game, not enough players remained - THE END';
+      msg = player.name+' left the game,<br> not enough players remained -<br> THE END';
       log(msg);
       state = WAITING_FOR_GAME_START;
       io.to(id)

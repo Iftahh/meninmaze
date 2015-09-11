@@ -1,7 +1,7 @@
 var utils = require('./utils');
 
 
-var KEYS={}, player;
+var KEYS={}, world;
 
 var updateFromKeys = function(e, realEv) {
   var code= e.keyCode;
@@ -15,6 +15,7 @@ var updateFromKeys = function(e, realEv) {
       else {
         element.classList.remove('clicked');
       }
+      var player = world.player;
       player.up = KEYS[38];
       player.right = KEYS[39];
       player.left = KEYS[37];
@@ -35,8 +36,8 @@ showcontrols.onclick = function() {
   })
 }
 
-KEYS.bind = function(world) {
-  player = world.player;
+KEYS.bind = function(wrld) {
+  world = wrld;
   document.addEventListener('keydown', updateFromKeys);
   document.addEventListener('keyup', updateFromKeys);
 
@@ -56,20 +57,21 @@ KEYS.bind = function(world) {
           x = event.touches[0].clientX;
           y = event.touches[0].clientY;
         }
+        var width=world.width, height=world.height;
         var e = {type: (type == 'mouseup')? 0: 'keydown' };
         // UGLY - using hard coded values from CSS
-        if (x < 10+55) {
+        if (x < width*(.02+.1)) {
           e.keyCode = 37; // left
           updateFromKeys(e, event);
           updateFromKeys({type:0, keyCode: 39 }, event);
         }
-        else if (x<10+55+65+55 && 10+55+65 <x) {
+        else if (x<width*(.02+.08+.02+0.08) && width*(.02+0.08+.02) <x) {
           e.keyCode = 39; // right
           updateFromKeys(e, event);
           updateFromKeys({type:0, keyCode: 37 }, event);
         }
         var y = innerHeight - y;
-        if (y < 10+55+65 && 10+65 <y) {
+        if (y < height*(.02+.2) && height*.12 <y) {
           e.keyCode = 38;
           updateFromKeys(e, event);
           updateFromKeys({type:0, keyCode: 40 }, event);

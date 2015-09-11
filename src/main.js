@@ -21,20 +21,22 @@ var input = require('./input');
 var totalElapsed = 0;
 
 
-var width, height, halfWidth, halfHeight;
-window.onresize = function() {
-  width=canvas.width = innerWidth;
-  height=canvas.height = innerHeight;
-  halfWidth = width >> 1;
-  halfHeight = height >> 1;
-  ctx.font = 'italic 4pt Calibri';
-  ctx.textAlign = 'center';
-}
-onresize();
-
 var redChecked = rng.bool();
 red.checked = redChecked;
 blue.checked = !redChecked;
+
+
+blue.onclick = red.onclick = function() {
+  if (client.gameState.state) { return;  }
+  if (blue.checked) {
+    player.deserialize({x:(80)/4, y:0, anim:'fall', dir:0})
+    player.setColor(1);
+  }
+  else {
+    player.setColor(2);
+    player.deserialize({x:(world.width-140)/4, y:0, anim:'fall', dir:1})
+  }
+}
 
 
 var world = {
@@ -51,6 +53,20 @@ var world = {
 }
 var player = world.player;
 player.textColor = 1;
+
+
+var width, height, halfWidth, halfHeight;
+window.onresize = function() {
+  world.width=canvas.width = innerWidth;
+  world.height=canvas.height = innerHeight;
+  halfWidth = world.width >> 1;
+  halfHeight = world.height >> 1;
+  ctx.font = 'italic 4pt Calibri';
+  ctx.textAlign = 'center';
+  blue.onclick();
+}
+onresize();
+
 
 function game(elapsed) {
     player.update(world, elapsed);
@@ -99,17 +115,6 @@ start.onclick = function() {
   client.startGame();
 }
 
-blue.onclick = red.onclick = function() {
-  if (blue.checked) {
-    player.deserialize({x:(80)/4, y:0, anim:'fall', dir:0})
-    player.setColor(1);
-  }
-  else {
-    player.setColor(2);
-    player.deserialize({x:(width-140)/4, y:0, anim:'fall', dir:1})
-  }
-}
-blue.onclick();
 
 pname.value = player.name;
 pname.onkeyup = function() {
@@ -214,9 +219,9 @@ client.connect({
 raf.start(function(elapsed) {
 
   // Clear the screen
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //ctx.clearRect(0, 0, world.width, world.height);
   ctx.fillStyle = "#222";
-  ctx.fillRect(0, 0, width, height);
+  ctx.fillRect(0, 0, world.width, world.height);
 
   ctx.save();
   state(elapsed);

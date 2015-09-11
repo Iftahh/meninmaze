@@ -6,6 +6,7 @@ body {
 #warning-message { display: none; }
 @media only screen and (max-device-width: 480px) and (orientation:portrait){
    #game { display:none; }
+   .menu { display:none;}
    #warning-message { display:block; }
 }
 @media only screen and (max-device-width: 480px) and (orientation:landscape){
@@ -25,13 +26,13 @@ body {
   background: radial-gradient(rgb(254, 84, 84), rgb(234, 50, 50), rgb(96, 37, 37));
 }
 
-.block {
+.powerup {
   background: radial-gradient(rgb(244, 244, 24), rgb(224, 224, 20), rgb(126, 126, 17));
   right: 100px;
   bottom: 25px;
 }
 
-.block.clicked {
+.powerup.clicked {
   background: radial-gradient(rgb(254, 254, 64), rgb(234, 234, 40), rgb(146, 146, 37));
 }
 
@@ -52,7 +53,7 @@ body {
   line-height: 80px;
   text-align:center;
   vertical-align: middle;
-  font-size: 24px;
+  font-size: 18px;
   color: #fff;
   cursor: pointer;
   -webkit-user-select: none;
@@ -99,19 +100,18 @@ body {
 
 // See input.js - if you update these values update the mouse/touch listener!
 .w1 {
-  width: 55px;
+  width: 2vw;
 }
 .w2 {
-  width: 65px;
+  width: 8vw;
 }
-.h1 {
-  height: 55px;
-  line-height: 55px;
+.w3 {
+  width: 5vw;
 }
 
 .h2 {
-  height: 65px;
-  line-height: 65px;
+  height: 10vh;
+  line-height: 10vh;
 }
 
 .menu {
@@ -192,6 +192,7 @@ body {
   left: 50%;
   margin-left: -100px;
   margin-top: -50px;
+  text-align: center;
   width: 200px;
   padding: 10px;
   border: 1px solid #DDD;
@@ -207,14 +208,12 @@ body {
   line-height: 30px;
   color: #EEE;
   background: #888;
-  text-align: center;
   margin: -10px -10px 0 -10px;
   border-bottom: 2px solid #DDD;
 }
 
 
 #dialogContent {
-  text-align: left;
   padding: 20px 10px;
   border-bottom: 1px solid #CCC;
 }
@@ -224,5 +223,4 @@ body {
   border: 1px solid #888;
   background: #FFF;
   font-size: 20px;
-  text-align: center;
 }
