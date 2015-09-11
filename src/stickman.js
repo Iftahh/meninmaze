@@ -85,6 +85,12 @@ StickAnimation.prototype.render = function(ctx, stickman, elapsed) {
 		if (!this.repeat && frame2==0) {
 			frame2 = frame1; // when not repeating and end of anim the next frame is the same as last
 		}
+		if (frame1 < 0) {
+			frame1 += frames.length;
+		}
+		if (frame2 < 0) {
+			frame2 += frames.length;
+		}
 
 	  // if (frame1 != lastFrame) {
 		// 	console.log("frame1 = "+frame1);

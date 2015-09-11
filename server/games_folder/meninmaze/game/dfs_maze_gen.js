@@ -130,17 +130,17 @@ function generateMaze(MAZE_X, MAZE_Y) {
 
   maze.cycles = [];
   // add a few cycles
-  for (var cycles=0; cycles<4; cycles++) {
+  for (var cycles=0; cycles<5; cycles++) {
     var ofs = rndInt(maze.length);
     while(1) {
-      if (!maze[ofs] && maze[ofs+1] && maze[ofs-1] && !maze[ofs-MAZE_X] && !maze[ofs+MAZE_X]) {
+      var x = ofs%MAZE_X;
+      if (x > 1 && x < MAZE_X-1 &&
+        !maze[ofs] && maze[ofs+1] && maze[ofs-1] && !maze[ofs-MAZE_X] && !maze[ofs+MAZE_X]) {
         // found a vertical wall, check if the locations on the sides are far away to travel
         // - if so a good place to insert a cycle
         if (Math.abs(maze[ofs+1] - maze[ofs-1]) > 40) {
           // found a good place to add a cycle
           maze[ofs] = AIR;
-          log("adding cycle at ofset "+ofs );
-          maze.cycles.push(ofs);
           break;
         }
       }

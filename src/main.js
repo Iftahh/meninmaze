@@ -199,6 +199,8 @@ client.connect({
       }
     }
 
+    // count the initial blue/red start location as intersections
+    world.intersections[gs.blue] = world.intersections[gs.red] = 1;
 
     updateGame();
     var blue_loc = ofsToXY(gs.blue),

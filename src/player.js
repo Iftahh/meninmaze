@@ -112,8 +112,28 @@ module.exports = function Player() {
     var step = world.cellSize/60;
 
     if (this.btnB && reverseStack.length) {
-      // update reverse
+      // update reverse movement
+      var cellX = Math.floor(x / world.cellSize),
+        cellY = Math.floor(y / world.cellSize),
+        ofs = world.maze.xyToOfs(cellX,cellY);
+
+      if (ofs == reverseStack[reverseStack.length-1]) {
+        reverseStack.pop();
+        if (reverseStack.length == 0) {
+          this.update(world, elapsed); // stop reversing
+          return;
+        }
+      }
       totalElapsed -= elapsed;
+      if (!reverseDirections.length) {
+        // generate reverse directions to next intersection
+        // from next intersection, to current location
+        world.maze.BFS([reverseStack[reverseStack.length-1]], ofs);
+      }
+
+
+
+
       return;
     }
 
