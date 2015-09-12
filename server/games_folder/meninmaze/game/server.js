@@ -174,6 +174,18 @@ function onExit(player) {
   }
 }
 
+function bulbUpdate(d) {
+  log("bulb "+d.ofs+" updated to "+d.color);
+  bulbs[d.ofs] = d.color;
+  var counts=[0,0,0];
+  for (var b in bulbs) {
+    counts[bulbs[b]]++;
+  }
+  io.to(id).emit('news', {message: "<h3>"+ counts[0]+" white <span class='blue'>"+counts[1]+
+      " blue</span> <span class='red'>"+counts[2]+" red</span> !</h3>"})
+}
+
+
 var color = 1;
 io.on('connection', function(socket) {
   log('New connection', socket.id);
@@ -187,7 +199,7 @@ io.on('connection', function(socket) {
   socket.on('playerInfo', function(d) { playerInfo(player,d)});
   socket.on('startGame', function(d) { playerStarted(player,d)});
   socket.on('update', function(d) { playerUpdate(player,d)});
-  socket.on('bulbUpdate', function(d) { log("bulb "+d.ofs+" updated to "+d.color); bulbs[d.ofs] = d.color ; });
+  socket.on('bulbUpdate', bulbUpdate);
   socket.on('disconnect', onExit.bind(0,player));
 
   socket.emit('yourId', {id: player.id, color: color});

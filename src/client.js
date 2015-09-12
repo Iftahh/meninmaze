@@ -47,7 +47,7 @@ function onNews(data) {
   //messageBox.textContent = data.message;
   var msg = document.createElement('p');
   msg.className = 'show';
-  msg.textContent = data.message;
+  msg.innerHTML = data.message;
   messageBox.appendChild(msg);
   var opac = 1;
   var opacInt= setInterval(function(){ opac *= 0.995; msg.style.opacity=opac; }, 20);

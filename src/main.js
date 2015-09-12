@@ -258,7 +258,7 @@ client.connect({
 
   onDisconnect: function(endGameMsg) {
     openDialog(
-      'Disconnected', endGameMsg+'<br>Do you want to reconnect?',
+      'Disconnected', (endGameMsg||"Disconnected!")+'<br>Do you want to reconnect?',
       'Reconnect', function() {
         document.location.reload();// TODO: prpoer reconnect
         dialog.style.display = 'none';

@@ -17,13 +17,12 @@
       <label>What is your name? <br> <input id="pname"></label><br>
       <br>
       What team would you like?<br>
-      <label style="color:blue"><input type="radio" name="color" id="blue">Blue </label>
-      <label style="color:red"><input type="radio" name="color" id="red">Red</label><br>
+      <label class="blue"><input type="radio" name="color" id="blue">Blue </label>
+      <label class="red"><input type="radio" name="color" id="red">Red</label><br>
       <br>
 
       <label>Opaque on-screen controls? <input id="showcontrols" type="checkbox" checked></label><br>
       <button id="start" disabled >Loading...</button>
-      <div id="messageBox"></div>
     </div>
 
     <canvas id="canvas"></canvas>
@@ -35,7 +34,7 @@
         <span class="w2" id="37">&#8592;</span><span class="w1 hidden"></span><span class="w2" id="39">&#8594;</span>
       </div>
     </div>
-    <div class="button hit game" id="83">Hit</div>
+    <div class="button hit game" id="83">Fire</div>
     <div class="button powerup game" id="65">Reverse</div>
 
     <div id="dialog" style="display:none">
@@ -44,6 +43,7 @@
       <b id="dialogBtFunc"></b>
     </div>
 
+    <div id="messageBox"></div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="build.js"></script>
