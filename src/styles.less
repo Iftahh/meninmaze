@@ -3,6 +3,10 @@ body {
   margin:0;
 }
 
+* {
+  user-select: none;
+}
+
 #warning-message { display: none; }
 @media only screen and (max-device-width: 480px) and (orientation:portrait){
    #game { display:none; }
@@ -176,8 +180,9 @@ body {
   position:fixed;
   bottom:0;
   left:50%;
-  width: 200px;
-  margin-left:-100px;
+  width: 300px;
+  margin-left:-150px;
+  text-align: center;
 }
 #messageBox p {
   background:rgba(0,0,0,0.5);

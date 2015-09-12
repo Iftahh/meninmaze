@@ -44,7 +44,7 @@ var world = {
   maxSpeedY: 8,
   jumpFromGround: 7.5, // boost up speed when jumping off ground
   jumpFromAir: 0.1, // smaller gravity when pressing up even in air
-  chanceJumpWall: 0.2,  // chance to be able to jump from
+  chanceJumpWall: 0.3,  // chance to be able to jump from
   wallFriction: 0.7,
   player:  new Player(),
   otherPlayers:{},
@@ -258,7 +258,7 @@ client.connect({
 
   onDisconnect: function(endGameMsg) {
     openDialog(
-      'Disconnected', (endGameMsg||"Disconnected!")+'<br>Do you want to reconnect?',
+      'Disconnected', endGameMsg+'<br>Do you want to reconnect?',
       'Reconnect', function() {
         document.location.reload();// TODO: prpoer reconnect
         dialog.style.display = 'none';
@@ -276,7 +276,7 @@ client.connect({
     // });
 
     openDialog(
-      'Game Ended', client.gameState.endMsg+'<br>Do you want to play again?',
+      'Game Ended', (client.gameState.endMsg||'')+'<br>Do you want to play again?',
       'Play Again', function() {
         document.location.reload();
         dialog.style.display = 'none';

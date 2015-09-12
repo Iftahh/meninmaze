@@ -44,14 +44,19 @@ function connect(cb, world) {
 
 function onNews(data) {
   console.log("onNews ", data);
+  if (gameState.state == 2) { // started game
+    messageBox.innerHTML = null;
+  }
   //messageBox.textContent = data.message;
   var msg = document.createElement('p');
   msg.className = 'show';
   msg.innerHTML = data.message;
   messageBox.appendChild(msg);
   var opac = 1;
-  var opacInt= setInterval(function(){ opac *= 0.995; msg.style.opacity=opac; }, 20);
-  setTimeout(function(){ messageBox.removeChild(msg); clearInterval(opacInt); }, 5*1000);
+  var opacInt= setInterval(function(){
+    opac *= 0.995; msg.style.opacity=opac;
+  }, 20);
+  setTimeout(function(){ try { messageBox.removeChild(msg); } catch(e){}; clearInterval(opacInt); }, 5*1000);
 }
 
 var endGameMsg = 'The server connection dropped.';

@@ -23,6 +23,8 @@ var
   GAME_STARTED = 2,
   ALREADY_STARTED = 3,
 
+  NUM_OF_BULBS=5,
+
   MAZE_X = 48, // must be divisible by 2
   MAZE_Y = 40,// must be divisible by 2
   players= [],
@@ -30,6 +32,7 @@ var
   sockets={},
   redStart=-1,
   blueStart=-1,
+  winTimestamp, winningTeam, winInSec,
   maze= [],
   id = 'g'+Math.random(),  // TODO: support multiple games
   state = WAITING_FOR_GAME_START;
@@ -45,6 +48,7 @@ function findPlayer(player) {
 function playerStarted(player,data) {
   log("Game starting!");
   state = GAME_STARTING;
+  winTimestamp = 0;
 
   io.to(id)
     .emit('news', { message: player.name+' started the game!' })
@@ -74,11 +78,30 @@ function playerStarted(player,data) {
       // start updating the game state -
       setTimeout(function gameTick() {
         if (state != GAME_STARTED) return;
-        io.to(id).emit('state', {
+        var data = {
           state:state,
           players:players,
           bulbs: bulbs
-        });
+        };
+        if (winTimestamp) {
+          var winIn = (winTimestamp - new Date()) / 1000 |0;
+          if (winIn != winInSec) {
+            winInSec = winIn;
+            var winMsg = winningTeam == 1 ? "<h2><span class='blue'>Blue</span> " : "<h2><span class='red'>Red</span> ";
+            if (winInSec == 0) {
+              winMsg +=  " TEAM WON!!!</h2>";
+              io.to(id).emit('news', {message: winMsg});
+              state = WAITING_FOR_GAME_START;
+              data.state = state;
+              data.endMsg = winMsg;
+              log(winMsg);
+            }
+            else  {
+              io.to(id).emit('news', {message: winMsg+ "team winning in "+winInSec+' !</h2>'});
+            }
+          }
+        }
+        io.to(id).emit('state', data);
         setTimeout(gameTick, 33);
       }, 33);
 
@@ -100,7 +123,7 @@ function playerStarted(player,data) {
   // find places for bulb lights - farthest places of the potentials starting with from the first
   var maxOfs= Math.random()*potentials.length|0;
   bulbsOfs.push(potentials.splice(maxOfs,1)[0]);
-  while (bulbsOfs.length < 7) {
+  while (bulbsOfs.length < NUM_OF_BULBS+2) {
     maze.BFS(bulbsOfs); // calculate distance from bulbs so far
     // find the farthest potential place, add repeat
     var max=0;
@@ -130,10 +153,10 @@ function playerUpdate(player, data) {
 }
 
 function playerInfo(player,data) {
-  if (state != WAITING_FOR_GAME_START) {
-    // allow changing player name/color only before game start
-    return;
-  }
+  // if (state == WAITING_FOR_GAME_START) {
+  //   // allow changing player name/color only before game start
+  //   return;
+  // }
   for (k in data) {
     player[k] = data[k];
   }
@@ -181,8 +204,26 @@ function bulbUpdate(d) {
   for (var b in bulbs) {
     counts[bulbs[b]]++;
   }
-  io.to(id).emit('news', {message: "<h3>"+ counts[0]+" white <span class='blue'>"+counts[1]+
-      " blue</span> <span class='red'>"+counts[2]+" red</span> !</h3>"})
+
+  io.to(id).emit('news', {message: "<h3><span style='font-size:x-large'>"+ counts[0]+"</span> white <span class='blue'><span style='font-size:x-large'>"+counts[1]+
+      "</span> blue</span> <span class='red'><span style='font-size:x-large'>"+counts[2]+"</span> red</span></h3>"});
+
+  if (counts[1] >= NUM_OF_BULBS-4) {
+    if (winningTeam != 1) {
+      winTimestamp= +new Date() + 30000;
+      winningTeam = 1;
+    }
+  }
+  else if (counts[2] >= NUM_OF_BULBS-4) {
+    if (winningTeam != 2) {
+      winTimestamp= +new Date() + 30000;
+      winningTeam = 2;
+    }
+  }
+  else {
+    winTimestamp = winInSec =winningTeam= 0;
+  }
+
 }
 
 
