@@ -51,7 +51,7 @@ var world = {
   bulbsDict: {}
 }
 var player = world.player;
-player.textColor = 1;
+player.self = 1;
 
 
 var width, height, halfWidth, halfHeight;
@@ -61,7 +61,7 @@ window.onresize = function() {
   halfWidth = world.width >> 1;
   halfHeight = world.height >> 1;
   // for some reason the ctx resets on resize.. so redo
-  ctx.font = 'italic 4pt Calibri';
+  ctx.font = 'italic 5pt Calibri';
   ctx.textAlign = 'center';
   blue.onclick();
 }
@@ -214,6 +214,7 @@ client.connect({
       // el.classList.add('inmenu-back')
       setTimeout(function() { el.style.display = 'none'}, 1000);
     });
+    camera.scale = 2;
     input.bind(world);
     var gs = client.gameState;
 

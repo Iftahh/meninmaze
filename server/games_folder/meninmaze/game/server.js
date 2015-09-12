@@ -205,16 +205,17 @@ function bulbUpdate(d) {
     counts[bulbs[b]]++;
   }
 
-  io.to(id).emit('news', {message: "<h3><span style='font-size:x-large'>"+ counts[0]+"</span> white <span class='blue'><span style='font-size:x-large'>"+counts[1]+
-      "</span> blue</span> <span class='red'><span style='font-size:x-large'>"+counts[2]+"</span> red</span></h3>"});
+  io.to(id).emit('news', {message: "<h3><span class='blue'><span style='font-size:x-large'>"+ counts[1]+
+    "</span> blue</span> <span style='font-size:x-large'>"+counts[0]+
+      "</span> white <span class='red'><span style='font-size:x-large'>"+counts[2]+"</span> red</span></h3>"});
 
-  if (counts[1] >= NUM_OF_BULBS-4) {
+  if (counts[1] >= NUM_OF_BULBS-2) {
     if (winningTeam != 1) {
       winTimestamp= +new Date() + 30000;
       winningTeam = 1;
     }
   }
-  else if (counts[2] >= NUM_OF_BULBS-4) {
+  else if (counts[2] >= NUM_OF_BULBS-2) {
     if (winningTeam != 2) {
       winTimestamp= +new Date() + 30000;
       winningTeam = 2;

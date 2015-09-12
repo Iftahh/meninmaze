@@ -19,6 +19,7 @@ module.exports = function Player() {
     run = stickman.animations.run,
     stand = stickman.animations.stand,
     notMoving = 0,
+    lastFired= 0,
 
     totalElapsed=0,
     curAnim=0,
@@ -27,7 +28,7 @@ module.exports = function Player() {
   function setAnim(anim) {
     if (anim != curAnim) {
       curAnim = anim;
-      //console.log("Setting anim to "+anim.name);
+      // console.log("Setting anim to "+anim.name);
       totalElapsed = 0;
     }
   }
@@ -68,9 +69,6 @@ module.exports = function Player() {
   this.setColor= function(col) {
     this.color = col;
     stickman = new StickMan(col==1?70:170, 70, col!=1?70:170);
-    if (this.textColor != 1) {
-      this.textColor = stickman.col3;
-    }
     if (this.emitPlayerInfo) {
       this.emitPlayerInfo();
     }
@@ -92,13 +90,14 @@ module.exports = function Player() {
     // ctx.fillRect(0, 0, WIDTH, HEIGHT);
     // ctx.translate(WIDTH/2, HEIGHT);
     ctx.translate(x+WIDTH/2, y+HEIGHT);
-    if (this.textColor == 1) {
-      ctx.fillStyle = "#ff0";
+    if (this.self) {
+      ctx.fillStyle = '#ff0';
     }
     else {
-      ctx.fillStyle = this.textColor;
+      ctx.fillStyle = stickman.col3;
     }
     ctx.fillText(this.name, 0,-HEIGHT-5);
+
     ctx.scale(0.15, 0.15);
     ctx.lineWidth = 15;
     ctx.lineJoin = 'bevel';
@@ -124,12 +123,12 @@ module.exports = function Player() {
     totalElapsed -= elapsed;
 
     if (ofs == reverseStack[reverseStack.length-1]) {
-      console.log("Reached ofs at top reverseStack of len ", reverseStack.length);
+      //console.log("Reached ofs at top reverseStack of len ", reverseStack.length);
       reverseStack.pop();
       reverseDirections = [];
       if (reverseStack.length == 0) {
         vx=vy=0;
-        console.log("Reached end of reverse stack, stop reversing");
+        //console.log("Reached end of reverse stack, stop reversing");
         reverseStack.push(ofs);
         //this.update(world, elapsed); // stop reversing
         return;
@@ -140,7 +139,7 @@ module.exports = function Player() {
     // so we have to move back to that intersection, check if we have directions ready
 
     if (!reverseDirections.length) {
-      console.log("No reverse directions, generating");
+      //console.log("No reverse directions, generating");
       // generate reverse directions to next intersection
       // from next intersection, to current location
       maze.BFS([reverseStack[reverseStack.length-1]], ofs);
@@ -168,7 +167,7 @@ module.exports = function Player() {
           debugger;
           break;
         }
-        console.log("Reverse directions ", reverseDirections);
+        //console.log("Reverse directions ", reverseDirections);
       }
       ofs = ofs0;
     }
@@ -243,9 +242,29 @@ module.exports = function Player() {
         groundAnim = stand;
       }
     }
+
     if (onGround && !onWall) {
-      // walk, run, brakes, stand,  these should be set only if on ground and not sliding on wall
-      setAnim(groundAnim);
+      if (notMoving && this.btnA) {
+        notMoving = 0.1; // don't allow zoom out while firing
+        setAnim(stickman.animations.fire);
+        if (!lastFired) {
+          lastFired = +new Date();
+          console.log("BOOM");
+        }
+        else {
+          console.log("already fired");
+        }
+      }
+      else {
+        if (this.self) {
+          lastFired = 0;
+        }
+        // walk, run, brakes, stand,  these should be set only if on ground and not sliding on wall
+        setAnim(groundAnim);
+      }
+    }
+    else {
+      lastFired = 0;
     }
 
     // COLLISION DETECTION
@@ -309,6 +328,24 @@ module.exports = function Player() {
 
     // TODO: on wall animation
 
+    if (this.self) {
+      if (Math.abs(vx) > 1 || Math.abs(vy) > 1) {
+        notMoving = 0;
+      }
+      else {
+        notMoving += elapsed;
+        if (notMoving > 3) {
+          camera.scale = Math.max(camera.scale - 0.004, 0.5);
+        }
+        //console.log("scale "+camera.scale);
+      }
+
+      if (!notMoving || this.btnA) {
+        camera.scale = Math.min(camera.scale + 0.1, 1.7);
+        //console.log("scale "+camera.scale);
+      }
+    }
+
     if (!onGround) {
       if (vy > 0) {
         setAnim(stickman.animations.fall);
@@ -318,11 +355,12 @@ module.exports = function Player() {
       }
     }
 
+
     x += vx;
     y += vy;
 
     // keep track of intersections for undo later
-    if (world.intersections && world.player == this) {
+    if (world.intersections && this.self) {
       var cellX = Math.floor(x / world.cellSize),
         cellY = Math.floor(y / world.cellSize),
         ofs = world.maze.xyToOfs(cellX,cellY);
@@ -345,20 +383,6 @@ module.exports = function Player() {
       this.normalMove(world,elapsed);
     }
 
-    if (world.player == this) {
-      if (Math.abs(vx) > 0 || Math.abs(vy) > 0) {
-        camera.scale = Math.min(camera.scale + 0.1, 1.7);
-        //console.log("scale "+camera.scale);
-        notMoving = 0;
-      }
-      else {
-        notMoving += elapsed;
-        if (notMoving > 3) {
-          camera.scale = Math.max(camera.scale - 0.004, 0.5);
-        }
-        //console.log("scale "+camera.scale);
-      }
-    }
   }
 
   return this;

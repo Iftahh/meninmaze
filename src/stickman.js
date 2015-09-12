@@ -70,7 +70,7 @@ function linearMix(frame1, frame2, fraction) {
 // 	return this.width*elapsed/this.duration;
 // }
 
-//var lastFrame = -1;
+// var lastFrame = -1;
 StickAnimation.prototype.render = function(ctx, stickman, elapsed, reversed) {
 	var duration =  this.duration;
 	ctx.save();
@@ -168,7 +168,6 @@ function StickMan(r,g,b) {
 	this.col2 = 'rgb('+(r*f|0)+','+(g*f|0)+','+(b*f|0)+')';
 	f = 1.3;
 	this.col3 = 'rgb('+(r*f|0)+','+(g*f|0)+','+(b*f|0)+')';
-
 }
 
 StickMan.prototype.animations = {}
@@ -185,6 +184,7 @@ add('run', .6, /* seconds for walk cycle */	require('./tools/run'), true, true);
 add('stand', 3.2, require('./tools/stand'), true, true);
 add('jump', .4, jump, false, false);
 add('fall', .4, fall, false, false);
+add('fire', .15, require('./tools/fire'), false, false);
 
 module.exports = StickMan;
 
