@@ -121,78 +121,77 @@ module.exports = function Player() {
     }
     reversed = 1;
     // find offset of cell to move to:
-    while(1) {
+    totalElapsed -= elapsed;
 
-      if (ofs == reverseStack[reverseStack.length-1]) {
-        console.log("Reached ofs at top reverseStack of len ", reverseStack.length);
-        reverseStack.pop();
-        reverseDirections = [];
-        if (reverseStack.length == 0) {
-          vx=vy=0;
-          console.log("Reached end of reverse stack, stop reversing");
-          this.update(world, elapsed); // stop reversing
-          return;
-        }
+    if (ofs == reverseStack[reverseStack.length-1]) {
+      console.log("Reached ofs at top reverseStack of len ", reverseStack.length);
+      reverseStack.pop();
+      reverseDirections = [];
+      if (reverseStack.length == 0) {
+        vx=vy=0;
+        console.log("Reached end of reverse stack, stop reversing");
+        reverseStack.push(ofs);
+        //this.update(world, elapsed); // stop reversing
+        return;
       }
+    }
 
-      // at this point we know the offset at the top of the reverse stack (previous intersection) isn't our location
-      // so we have to move back to that intersection, check if we have directions ready
-      totalElapsed -= elapsed;
+    // at this point we know the offset at the top of the reverse stack (previous intersection) isn't our location
+    // so we have to move back to that intersection, check if we have directions ready
 
-      if (!reverseDirections.length) {
-        console.log("No reverse directions, generating");
-        // generate reverse directions to next intersection
-        // from next intersection, to current location
-        maze.BFS([reverseStack[reverseStack.length-1]], ofs);
-        var ofs0 = ofs;
-        while (ofs != reverseStack[reverseStack.length-1]) {
-          var score = maze[ofs] - 1;
-          if (maze[ofs+1] == score) {
-            ofs = ofs+1;
-            reverseDirections.push([1,0, ofs]);
-          } else if (maze[ofs-1] == score) {
-            ofs = ofs-1;
-            reverseDirections.push([-1,0, ofs]);
-          }
-          else if (maze[ofs-maze.MAZE_X] == score) {
-            ofs = ofs-maze.MAZE_X;
-            reverseDirections.push([0,-1, ofs]);
-          }
-          else if (maze[ofs+maze.MAZE_X] == score) {
-            ofs = ofs+maze.MAZE_X;
-            reverseDirections.push([0,1, ofs]);
-          }
-          else {
-            // TODO remove
-            console.log("can't find direction matching expected score!!! ",score);
-            debugger;
-            break;
-          }
-          console.log("Reverse directions ", reverseDirections);
+    if (!reverseDirections.length) {
+      console.log("No reverse directions, generating");
+      // generate reverse directions to next intersection
+      // from next intersection, to current location
+      maze.BFS([reverseStack[reverseStack.length-1]], ofs);
+      var ofs0 = ofs;
+      while (ofs != reverseStack[reverseStack.length-1]) {
+        var score = maze[ofs] - 1;
+        if (maze[ofs+1] == score) {
+          ofs = ofs+1;
+          reverseDirections.push([1,0, ofs]);
+        } else if (maze[ofs-1] == score) {
+          ofs = ofs-1;
+          reverseDirections.push([-1,0, ofs]);
         }
-        ofs = ofs0;
-      }
-
-      // at this point we have directions that will lead us to the previous intersection
-      var dirToMove = reverseDirections[0];
-      if (dirToMove[2] == ofs) {
-        // we are at the offset that the direction wants us to go
-        // place player at the cell center, and go to the next step in the directions
-        x = world.cellSize*(ofs%maze.MAZE_X + 0.5);
-        y = world.cellSize*(ofs/maze.MAZE_X|0) + HEIGHT/2;
-        reverseDirections.shift();
-        if (reverseDirections.length == 0) {
-          console.log("Reached end of directions but not reached the next intersection?!");
+        else if (maze[ofs-maze.MAZE_X] == score) {
+          ofs = ofs-maze.MAZE_X;
+          reverseDirections.push([0,-1, ofs]);
+        }
+        else if (maze[ofs+maze.MAZE_X] == score) {
+          ofs = ofs+maze.MAZE_X;
+          reverseDirections.push([0,1, ofs]);
+        }
+        else {
+          // TODO remove
+          console.log("can't find direction matching expected score!!! ",score);
           debugger;
-          continue; //
+          break;
         }
-        dirToMove = reverseDirections[0];
+        console.log("Reverse directions ", reverseDirections);
       }
+      ofs = ofs0;
+    }
+
+    // at this point we have directions that will lead us to the previous intersection
+    var dirToMove = reverseDirections[0];
+    if (dirToMove[2] == ofs) {
+      // we are at the offset that the direction wants us to go
+      // place player at the cell center, and go to the next step in the directions
+      x = world.cellSize*(ofs%maze.MAZE_X + 0.5);
+      y = world.cellSize*(ofs/maze.MAZE_X|0);
+      reverseDirections.shift();
+      // if (reverseDirections.length == 0) {
+      //   console.log("Reached end of directions but not reached the next intersection?!");
+      //   debugger;
+      // }
+      dirToMove = reverseDirections[0];
+    }
 
     // follow the step we got from the reverse direction
     direction = dirToMove[0] > 0; // look left or right - opposite of normal move - move right and look to the left
-    vx = dirToMove[0]*1.4*world.maxSpeedX;
-    vy = dirToMove[1]*1.4*world.maxSpeedX; // on purpose using maxSpeedX - speedY is too fast, but must remain fast enough to jump and climb
+    vx = dirToMove[0]*1.1*world.maxSpeedX;
+    vy = dirToMove[1]*1.1*world.maxSpeedX; // on purpose using maxSpeedX - speedY is too fast, but must remain fast enough to jump and climb
     if (dirToMove[0]) {
       setAnim(run);
     }

@@ -72,7 +72,7 @@ function linearMix(frame1, frame2, fraction) {
 
 //var lastFrame = -1;
 StickAnimation.prototype.render = function(ctx, stickman, elapsed, reversed) {
-	var duration = this.duration;
+	var duration =  this.duration;
 	ctx.save();
 
 	var frames = this.frames;
@@ -81,7 +81,7 @@ StickAnimation.prototype.render = function(ctx, stickman, elapsed, reversed) {
 		var durationPerFrame = duration/frames.length;
 
 		var frame1 = ((elapsed / durationPerFrame)|0)% frames.length;
-		var frame2 = (frame1 + (reversed? -1:1)) % frames.length;
+		var frame2 = (frame1 + 1) % frames.length;
 		if (!this.repeat && frame2==0) {
 			frame2 = frame1; // when not repeating and end of anim the next frame is the same as last
 		}
@@ -97,6 +97,9 @@ StickAnimation.prototype.render = function(ctx, stickman, elapsed, reversed) {
 		// 	lastFrame = frame1;
 		// }
 		var partialElapsed = elapsed % durationPerFrame;
+		if (partialElapsed < 0) {
+			partialElapsed += durationPerFrame;
+		}
 
 		frame = linearMix(frames[frame1], frames[frame2],
 				partialElapsed/durationPerFrame);
@@ -178,7 +181,7 @@ var jump = require('./tools/jump'),
 	fall = require('./tools/fall');
 fall.unshift(jump[jump.length-1]); // fall starts with frame that is the final jump frame
 
-add('run', 0.6, /* seconds for walk cycle */	require('./tools/run'), true, true);
+add('run', .6, /* seconds for walk cycle */	require('./tools/run'), true, true);
 add('stand', 3.2, require('./tools/stand'), true, true);
 add('jump', .4, jump, false, false);
 add('fall', .4, fall, false, false);
