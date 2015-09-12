@@ -161,12 +161,12 @@ module.exports = function Player() {
           ofs = ofs+maze.MAZE_X;
           reverseDirections.push([0,1, ofs]);
         }
-        else {
-          // TODO remove
-          console.log("can't find direction matching expected score!!! ",score);
-          debugger;
-          break;
-        }
+        // else {
+        //   // TODO remove
+        //   console.log("can't find direction matching expected score!!! ",score);
+        //   debugger;
+        //   break;
+        // }
         //console.log("Reverse directions ", reverseDirections);
       }
       ofs = ofs0;
@@ -177,8 +177,6 @@ module.exports = function Player() {
     if (dirToMove[2] == ofs) {
       // we are at the offset that the direction wants us to go
       // place player at the cell center, and go to the next step in the directions
-      x = world.cellSize*(ofs%maze.MAZE_X + 0.5);
-      y = world.cellSize*(ofs/maze.MAZE_X|0);
       reverseDirections.shift();
       // if (reverseDirections.length == 0) {
       //   console.log("Reached end of directions but not reached the next intersection?!");
@@ -189,13 +187,15 @@ module.exports = function Player() {
 
     // follow the step we got from the reverse direction
     direction = dirToMove[0] > 0; // look left or right - opposite of normal move - move right and look to the left
-    vx = dirToMove[0]*1.1*world.maxSpeedX;
-    vy = dirToMove[1]*1.1*world.maxSpeedX; // on purpose using maxSpeedX - speedY is too fast, but must remain fast enough to jump and climb
+    vx = dirToMove[0]*1.2*world.maxSpeedX;
+    vy = dirToMove[1]*1.2*world.maxSpeedX; // on purpose using maxSpeedX - speedY is too fast, but must remain fast enough to jump and climb
     if (dirToMove[0]) {
       setAnim(run);
+      y = world.cellSize*(ofs/maze.MAZE_X|0);
     }
     if (dirToMove[1]) {
       setAnim(stickman.animations.fall);
+      x = world.cellSize*(ofs%maze.MAZE_X + 0.5);
     }
 
     x += vx;
@@ -365,10 +365,10 @@ module.exports = function Player() {
         cellY = Math.floor(y / world.cellSize),
         ofs = world.maze.xyToOfs(cellX,cellY);
       if (world.intersections[ofs] && reverseStack[reverseStack.length-1] != ofs) {
-        console.log("Pushing "+cellX+","+cellY+"  ofs:"+ofs+" to reverse stack");
+        // console.log("Pushing "+cellX+","+cellY+"  ofs:"+ofs+" to reverse stack");
         reverseStack.push(ofs);
         // not likely the stack will increase to this size but I hate having arrays growing to infinity
-        if (reverseStack.length > 300) {
+        if (reverseStack.length > 500) {
           reverseStack.shift();
         }
       }

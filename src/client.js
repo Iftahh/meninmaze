@@ -25,9 +25,9 @@ function connect(cb, world) {
   callbacks = cb;
   player = world.player;
 
-  console.log('connecting');
+  // console.log('connecting');
   if (!socket.connected) socket = io();
-  console.log("Connect ", socket);
+  // console.log("Connect ", socket);
   socket.on('news', onNews);
   socket.on('state', onGameState);
   socket.on('disconnect', onDisconnect);
@@ -43,7 +43,7 @@ function connect(cb, world) {
 }
 
 function onNews(data) {
-  console.log("onNews ", data);
+  // console.log("onNews ", data);
   if (gameState.state == 2) { // started game
     messageBox.innerHTML = null;
   }
@@ -99,7 +99,7 @@ function onGameState(data) {
     case 2: // started
       if (started == 0) {
         callbacks.onStart();
-        console.log("Game started ",data);
+        // console.log("Game started ",data);
         started = 1;
         updateInt = setInterval(function(){
           // Submit mouse position only each 33ms if it was changed.
@@ -126,7 +126,7 @@ function onGameState(data) {
 // Player pressed "start" -
 // cb = callback to call when the game actually starts
 function startGame() {
-  console.log("Game starting!");
+  // console.log("Game starting!");
   if (gameState.state == 3) { // join existing game
     gameState.state = 1;
     onGameState({state:2});
@@ -136,7 +136,7 @@ function startGame() {
 }
 
 function onDisconnect(data) {
-  console.log("onDisconnect ",data || '');
+  // console.log("onDisconnect ",data || '');
   gameState.state = 0;
   callbacks.onDisconnect(endGameMsg);
 }

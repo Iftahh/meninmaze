@@ -40,6 +40,13 @@ body {
   background: radial-gradient(rgb(254, 254, 64), rgb(234, 234, 40), rgb(146, 146, 37));
 }
 
+.key {
+  border: 1px #ddd outset;
+  border-radius: 2px;
+  padding: 2px;
+  box-shadow: 1px 1px #222;
+}
+
 #arrows {
   position:fixed;
   bottom: 2vh;
@@ -131,8 +138,8 @@ body {
   top: 10%;
   left: 30%;
   text-align: center;
-  line-height: 1.6vw;
-  font-size: 1.5vw;
+  line-height: 1.3vw;
+  font-size: 1.2vw;
   background: rgba(120,120,120,0.8);
   border: 1px solid #ddf;
   border-radius: 20px;
@@ -141,16 +148,18 @@ body {
   opacity: 0;
 }
 
-#start {
-  padding: 10px 20px;
-  margin: 20px;
+.menu button {
   box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-  cursor:not-allowed;
-  font-size: 1.6vw;
   border: 2px outset rgba(125,125,125,0.6);
   border-radius: 3px;
   background: linear-gradient(rgb(224, 224, 224), rgb(204, 204, 204), rgb(126, 126, 126));
+}
 
+#start {
+  padding: 10px 20px;
+  margin: 20px;
+  cursor:not-allowed;
+  font-size: 1.6vw;
 }
 
 #dialogBtFunc {
@@ -163,12 +172,12 @@ body {
   padding: 5px 10px;
 }
 
-#start:enabled, #dialogBtFunc {
+.menu button:enabled, #start:enabled, #dialogBtFunc {
   box-shadow: 3px 3px 6px rgba(0,0,0,0.5);
   cursor:pointer;
 }
 
-#arrows span:hover, #arrows span.clicked, #dialogBtFunc:hover, #start:hover:enabled {
+#arrows span:hover, #arrows span.clicked, #dialogBtFunc:hover, .menu button:hover:enabled {
   background: linear-gradient(rgb(244, 244, 224), rgb(224, 224, 204), rgb(166, 166, 76));
   color: #fff;
   text-shadow: 0 0 2px #222;
@@ -208,11 +217,11 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
-  margin-left: -100px;
-  margin-top: -50px;
+  margin-left: -200px;
+  margin-top: -150px;
   text-align: center;
-  width: 200px;
-  padding: 10px;
+  width: 400px;
+  padding: 6px;
   border: 1px solid #DDD;
   background: #BBD;
   font-size: 14px;
@@ -221,12 +230,16 @@ body {
   box-shadow: 3px 3px 6px rgba(0,0,0,0.5);
 }
 
+li {
+  margin-top: 5px;
+}
+
 #dialogTitle {
   font-size: 20px;
   line-height: 30px;
   color: #EEE;
   background: #888;
-  margin: -10px -10px 0 -10px;
+  margin: -6px -6px 0 -6px;
   border-bottom: 2px solid #DDD;
 }
 

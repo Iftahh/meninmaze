@@ -35,6 +35,20 @@ blue.onclick = red.onclick = function() {
   }
 }
 
+howto.onclick = function() {
+  openDialog(
+    'How to Play',
+      '<ul style="text-align:left"><li>Use Arrow keys to move (<span class="key">&#8593;</span> = Jump) or use the onscreen controls on touch device</li>'+
+      '<li>Run into walls as you fall to slide slowly</li>'+
+      '<li>Jump while sliding down a wall to jump off the wall. <br><em>This is how you climb!</em></li>'+
+      '<li>To go back quickly use <em>REVERSE</em> (<span class="key">A</span> button) <br><em>Very useful when you reach a dead end!</em></li>'+
+      "<li>Don't move for 3 seconds to zoom out.<br><em>It may save you much more than 3 sec!</em></li>"+
+      "<li>Touch a Bulb to light it your team's color<br><strong>The first team to keep 3 Bulbs lit wins the game!</strong></li>",
+    'OK', function() {
+      dialog.style.display = 'none';
+  });
+}
+
 
 var world = {
   cellSize: 32, //2*Math.min((canvas.width-20)/48, (canvas.height-20)/40);
@@ -297,5 +311,10 @@ raf.start(function(elapsed) {
   ctx.restore();
 	checkfps();
 });
+
+if (window.localStorage && !localStorage["instructions-shown"]) {
+  howto.click();
+  localStorage['instructions-shown'] = true;
+}
 
 })();
