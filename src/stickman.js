@@ -71,7 +71,7 @@ function linearMix(frame1, frame2, fraction) {
 // }
 
 //var lastFrame = -1;
-StickAnimation.prototype.render = function(ctx, stickman, elapsed) {
+StickAnimation.prototype.render = function(ctx, stickman, elapsed, reversed) {
 	var duration = this.duration;
 	ctx.save();
 
@@ -81,7 +81,7 @@ StickAnimation.prototype.render = function(ctx, stickman, elapsed) {
 		var durationPerFrame = duration/frames.length;
 
 		var frame1 = ((elapsed / durationPerFrame)|0)% frames.length;
-		var frame2 = (frame1+1) % frames.length;
+		var frame2 = (frame1 + (reversed? -1:1)) % frames.length;
 		if (!this.repeat && frame2==0) {
 			frame2 = frame1; // when not repeating and end of anim the next frame is the same as last
 		}

@@ -40,7 +40,7 @@ var world = {
   cellSize: 32, //2*Math.min((canvas.width-20)/48, (canvas.height-20)/40);
   maze: {get: function(x,y) { return y > 1 ? 0:1}},
   gravity: 0.5, // reduce speed Y every tick
-  maxSpeedX: 6,
+  maxSpeedX: 4,
   maxSpeedY: 8,
   jumpFromGround: 7.5, // boost up speed when jumping off ground
   jumpFromAir: 0.1, // smaller gravity when pressing up even in air
@@ -162,11 +162,13 @@ var updateGame = function() {
         for (var k in world.otherPlayers) {
           if (world.otherPlayers[k].color == 1) {bluePlayers++} else {redPlayers++}
         }
+        // possibly the color of this player remained the same, but the number of players chnaged...
+        // TODO fix location of players
         if (p.color == 1) {
-          p.player = {x:(88)/4+10*bluePlayers, y:0, anim:'stand', dir:0}
+          p.player = {x:(48)/4+10*bluePlayers, y:0, anim:'stand', dir:0}
         }
         else {
-          p.player = {x:(world.width-148)/4-10*redPlayers, y:0, anim:'stand', dir:1}
+          p.player = {x:(world.width-108)/4-10*redPlayers, y:0, anim:'stand', dir:1}
         }
       }
       if (p.player) {

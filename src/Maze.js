@@ -71,6 +71,9 @@ function generateMaze(MAZE_X, MAZE_Y, maze, bulbs_dict) {
         }
       }
     }
+    for (var i=0; i<zeroDist.length; i++) {
+      maze[zeroDist[i]] = 10;
+    }
     var ofs,
         stack = zeroDist.slice(),
         d,

@@ -58,7 +58,7 @@ var endGameMsg = 'The server connection dropped.';
 
 function onGameState(data) {
   for (var k in data) { gameState[k] = data[k] }
-  console.log("game state ",data);
+  // console.log("game state ",data);
   callbacks.updateGame();
 
   switch (gameState.state) {
