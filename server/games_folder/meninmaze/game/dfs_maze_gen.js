@@ -41,6 +41,9 @@ function generateMaze(MAZE_X, MAZE_Y) {
         }
       }
     }
+    for (var i=0; i<zeroDist.length; i++) {
+      maze[zeroDist[i]] = 10;
+    }
     var ofs,
         stack = zeroDist.slice(),
         d,
@@ -128,7 +131,7 @@ function generateMaze(MAZE_X, MAZE_Y) {
 
   BFS([MAZE_X*y0+x0]);
 
-  maze.cycles = [];
+  //maze.cycles = []; // TODO remove
   // add a few cycles
   for (var cycles=0; cycles<5; cycles++) {
     var ofs = rndInt(maze.length);
@@ -138,9 +141,11 @@ function generateMaze(MAZE_X, MAZE_Y) {
         !maze[ofs] && maze[ofs+1] && maze[ofs-1] && !maze[ofs-MAZE_X] && !maze[ofs+MAZE_X]) {
         // found a vertical wall, check if the locations on the sides are far away to travel
         // - if so a good place to insert a cycle
-        if (Math.abs(maze[ofs+1] - maze[ofs-1]) > 40) {
+        if (Math.abs(maze[ofs+1] - maze[ofs-1]) > 20) {
           // found a good place to add a cycle
           maze[ofs] = AIR;
+          BFS([ofs]);
+        //  maze.cycles.push(ofs);
           break;
         }
       }
@@ -196,6 +201,7 @@ function generateMaze(MAZE_X, MAZE_Y) {
 
   maze.BFS = BFS;
   maze.places = findPlaces();
+  log("Finished generating maze");
   return maze;
 }
 

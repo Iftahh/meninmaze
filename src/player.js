@@ -1,6 +1,7 @@
 var camera = require('./camera');
 var rng = require('./rng');
 var StickMan = require('./stickman'),
+  Shot = require('./shot'),
 
   WIDTH=15, HEIGHT=25,
   BLUE=1, RED=2;
@@ -20,6 +21,7 @@ module.exports = function Player() {
     stand = stickman.animations.stand,
     notMoving = 0,
     lastFired= 0,
+    shot=0,
 
     totalElapsed=0,
     curAnim=0,
@@ -86,6 +88,7 @@ module.exports = function Player() {
 
   this.draw= function(ctx,dt) {
     ctx.save()
+
     // ctx.translate(x,y)
     // ctx.fillRect(0, 0, WIDTH, HEIGHT);
     // ctx.translate(WIDTH/2, HEIGHT);
@@ -98,6 +101,7 @@ module.exports = function Player() {
     }
     ctx.fillText(this.name, 0,-HEIGHT-5);
 
+
     ctx.scale(0.15, 0.15);
     ctx.lineWidth = 15;
     ctx.lineJoin = 'bevel';
@@ -107,13 +111,18 @@ module.exports = function Player() {
     curAnim.render(ctx, stickman, totalElapsed, reversed);
 
     ctx.restore()
+
+    if (shot) {
+      shot.draw(ctx)
+    }
+
   }
 
   this.reverseMovement = function(world,elapsed) {
     // update reverse movement
     var maze = world.maze,
-      cellX = Math.floor((x+WIDTH/2) / world.cellSize),
-      cellY = Math.floor((y+HEIGHT/2) / world.cellSize),
+      cellX = (x+WIDTH/2) / world.cellSize|0,
+      cellY = (y+HEIGHT/2) / world.cellSize|0,
       ofs = maze.xyToOfs(cellX,cellY);
     if (!reversed) {
       reverseDirections = [];
@@ -248,33 +257,40 @@ module.exports = function Player() {
         notMoving = 0.1; // don't allow zoom out while firing
         setAnim(stickman.animations.fire);
         if (!lastFired) {
-          lastFired = +new Date();
+          lastFired = 1;
           console.log("BOOM");
+          if (!shot)
+            shot= new Shot(x,y, direction);
+          // TODO: immediatly sync to server, don't wait for 33ms tick
         }
-        else {
-          console.log("already fired");
-        }
+        // else {
+        //   lastFired += elapsed;
+        //   console.log("already fired");
+        //   if (lastFired > 2 && !shot) {
+        //     shot = new Shot(x,y,direction, 4);
+        //     lastFired = 0;
+        //   }
+        // }
       }
       else {
-        if (this.self) {
-          lastFired = 0;
-        }
+        shot = lastFired = 0;
+
         // walk, run, brakes, stand,  these should be set only if on ground and not sliding on wall
         setAnim(groundAnim);
       }
     }
     else {
-      lastFired = 0;
+      shot = lastFired = 0;
     }
 
     // COLLISION DETECTION
 
     // find maze cell for collision check
     // initially checking Y collision, use smaller X
-    var cellXLeft = Math.floor((x+vx+2) / world.cellSize),
-      cellXRight = Math.floor((WIDTH-3+x+vx) / world.cellSize),
-      cellYTop = Math.floor((y+vy) / world.cellSize),
-      cellYBottom = Math.floor((HEIGHT+y+vy) / world.cellSize);
+    var cellXLeft = (x+vx+2) / world.cellSize|0,
+      cellXRight = (WIDTH-3+x+vx) / world.cellSize|0,
+      cellYTop = (y+vy) / world.cellSize|0,
+      cellYBottom = (HEIGHT+y+vy) / world.cellSize|0;
 
 
     onWall=onGround = 0;
@@ -296,10 +312,10 @@ module.exports = function Player() {
     }
 
     // checking X collision, use smaller Y
-    var cellXLeft = Math.floor((x+vx) / world.cellSize),
-      cellXRight = Math.floor((WIDTH+x+vx) / world.cellSize),
-      cellYTop = Math.floor((y+vy+2) / world.cellSize),
-      cellYBottom = Math.floor((HEIGHT-1+y+vy-2) / world.cellSize);
+    var cellXLeft = (x+vx) / world.cellSize|0,
+      cellXRight = (WIDTH+x+vx) / world.cellSize|0,
+      cellYTop = (y+vy+2) / world.cellSize|0,
+      cellYBottom = (HEIGHT-1+y+vy-2) / world.cellSize|0;
 
     var wallSlide = 0;
     if (vx > 0) {
@@ -361,8 +377,8 @@ module.exports = function Player() {
 
     // keep track of intersections for undo later
     if (world.intersections && this.self) {
-      var cellX = Math.floor(x / world.cellSize),
-        cellY = Math.floor(y / world.cellSize),
+      var cellX = x / world.cellSize|0,
+        cellY = y / world.cellSize|0,
         ofs = world.maze.xyToOfs(cellX,cellY);
       if (world.intersections[ofs] && reverseStack[reverseStack.length-1] != ofs) {
         // console.log("Pushing "+cellX+","+cellY+"  ofs:"+ofs+" to reverse stack");
@@ -382,7 +398,12 @@ module.exports = function Player() {
     else {
       this.normalMove(world,elapsed);
     }
-
+    if (shot) {
+      var remove = shot.update(world, elapsed);
+      if (remove) {
+        shot = 0;
+      }
+    }
   }
 
   return this;

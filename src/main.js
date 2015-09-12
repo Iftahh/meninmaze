@@ -9,7 +9,7 @@ var Maze = require('./Maze');
 var camera = require('./camera');
 var Player = require('./Player');
 var Bulb = require('./Bulb');
-require('./fpscounter');
+
 
 var ctx = canvas.getContext('2d');
 
@@ -309,7 +309,6 @@ raf.start(function(elapsed) {
   ctx.save();
   state(elapsed);
   ctx.restore();
-	checkfps();
 });
 
 if (window.localStorage && !localStorage["instructions-shown"]) {

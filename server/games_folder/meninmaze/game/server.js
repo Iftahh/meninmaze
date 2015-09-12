@@ -140,6 +140,9 @@ function playerStarted(player,data) {
   for (var i=2; i<bulbsOfs.length; i++) {
     bulbs[bulbsOfs[i]] = 0; // color white
   }
+  // for (var i=0; i<maze.cycles.length; i++) {
+  //   bulbs[maze.cycles[i]] = 1;
+  // }
 }
 
 function playerUpdate(player, data) {
