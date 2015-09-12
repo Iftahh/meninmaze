@@ -62,7 +62,11 @@ function onNews(data) {
 var endGameMsg = 'The server connection dropped.';
 
 function onGameState(data) {
+  var wasJoin = gameState.state == 3;
   for (var k in data) { gameState[k] = data[k] }
+  if (wasJoin) {
+    gameState.state = 3; // game updates will override this, so override back
+  }
   // console.log("game state ",data);
   callbacks.updateGame();
 
@@ -123,7 +127,8 @@ function onGameState(data) {
 // cb = callback to call when the game actually starts
 function startGame() {
   console.log("Game starting!");
-  if (gameState.state == 3) {
+  if (gameState.state == 3) { // join existing game
+    gameState.state = 1;
     onGameState({state:2});
     return;
   }
