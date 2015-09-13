@@ -84,7 +84,7 @@ KEYS.bind = function(wrld) {
     utils.each(['mousedown','mouseup', 'touchstart','touchmove','touchend'], function(evName) {
       el.addEventListener(evName, function(event) {
         var type = event.type;
-        console.log("event "+ type+ " "+event.target.id);
+        //console.log("event "+ type+ " "+event.target.id);
         var e = {type: (type == 'mouseup' || type=='touchend')? 0: 'keydown', keyCode: event.target.id };
         // fake a keydown/up event
         updateFromKeys(e, event);

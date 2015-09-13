@@ -134,7 +134,7 @@ module.exports = function Player() {
   };
 
   this.shotDown = function(size) {
-    console.log(this.self+" shot down by shot of size "+size)
+    //console.log(this.self+" shot down by shot of size "+size)
     disabled = 2*size;
     this._protected = disabled+2;
   };
@@ -339,7 +339,7 @@ module.exports = function Player() {
           groundAnim = stickman.animations.fire;
           if (!lastFired) {
             lastFired = 1;
-            console.log("BOOM");
+            //console.log("BOOM");
             if (!shot) {
               shot = new Shot(x,y, direction, this);
               // immediatly sync to server, don't wait for 33ms tick, to lessen delay to other players
