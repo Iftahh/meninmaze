@@ -48,7 +48,7 @@ function onNews(data) {
     messageBox.innerHTML = null;
   }
   //messageBox.textContent = data.message;
-  var msg = document.createElement('p');
+  var msg = document.createElement('div');
   msg.className = 'show';
   msg.innerHTML = data.message;
   messageBox.appendChild(msg);
@@ -101,18 +101,7 @@ function onGameState(data) {
         callbacks.onStart();
         // console.log("Game started ",data);
         started = 1;
-        updateInt = setInterval(function(){
-          // Submit mouse position only each 33ms if it was changed.
-          if (gameState.state != 2) {
-            clearInterval(updateInt);
-            updateInt = 0;
-            return;
-          }
-          socket.emit('update', {
-            id: gameState.playerId,
-            player: player.serialize()
-          })
-        }, 33);
+        updateInt = setInterval(updateTick, 33);
       }
       break;
 

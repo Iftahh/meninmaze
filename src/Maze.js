@@ -9,7 +9,7 @@ function generateMaze(MAZE_X, MAZE_Y, maze, bulbs_dict) {
   // TODO: add keys and locks, eg http://www.squidi.net/three/entry.php?id=4
 
   function drawMaze(ctx, cellSize) {
-      ctx.fillStyle = "#eef";
+      ctx.fillStyle = "#eee";
       //ctx.fillStyle = "#000";
       //ctx.fillRect(0,0, W, H);
       //BFS(MAZE_X*MAZE_Y-MAZE_X);

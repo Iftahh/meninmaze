@@ -45,7 +45,7 @@ module.exports = function Player() {
 
   // public
   this.name = 'Player '+rng.int(100);
-
+  this.bigShots=5;
   this.up = this.left = this.right = this.btnA = this.btnB = 0;
 
   this.serialize= function() {
@@ -53,6 +53,9 @@ module.exports = function Player() {
       x: x, y:y, vx:vx, vy:vy,
       anim:curAnim.name, dir:direction,
       reversed: reversed,
+      btnA:this.btnA, btnB:this.btnB,
+      bigShots: this.bigShots,
+      shot: shot? shot.serialize() : 0,
       up: this.up, left: this.left, right: this.right
     }
   };
@@ -65,8 +68,22 @@ module.exports = function Player() {
     if (undefined !== p.y) y=p.y;
     if (undefined !== p.vx) vx=p.vx;
     if (undefined !== p.vy) vy=p.vy;
+    if (undefined !== p.btnA && !this.self) this.btnA = p.btnA;
+    if (undefined !== p.btnB && !this.self) this.btnB = p.btnB;
     if (undefined !== p.anim) setAnim(stickman.animations[p.anim]);
     if (undefined !== p.dir) direction = p.dir;
+    if (undefined !== p.reversed) reversed = p.reversed;
+    if (undefined !== p.shot) {
+      if (p.shot == 0) {
+        shot = 0;
+      }
+      else {
+         if (!shot) {
+          shot = new Shot(p.shot.x, p.shot.y, p.shot.direction, this);
+        }
+        shot.totalElapsed = p.shot.totalElapsed;
+      }
+    }
     if (undefined !== p.up) up=p.up;
     if (undefined !== p.left) left=p.left;
     if (undefined !== p.right) right=p.right;
@@ -114,9 +131,9 @@ module.exports = function Player() {
 
     if (reversed) {
       // draw shadowwy before update
-      for (var i=1; i<4; i++) {
+      for (var i=1; i<3; i++) {
         ctx.save()
-        ctx.globalAlpha=.9-i*.2;
+        ctx.globalAlpha=.7-i*.2;
         ctx.translate(-vx*i/2,-vy*i/2);
         ctx.scale(0.15, 0.15);
         if (direction) {
@@ -150,6 +167,9 @@ module.exports = function Player() {
     if (!reversed) {
       reverseDirections = [];
       reversed = 1;
+      if (this.self) {
+        document.getElementById(65).style.transform = 'scale(-1,1)';
+      }
     }
 
     // find offset of cell to move to:
@@ -238,7 +258,13 @@ module.exports = function Player() {
   this.normalMove = function(world,elapsed) {
     totalElapsed += elapsed;
     var step = world.cellSize/60;
-    reversed = 0;
+    if (reversed) {
+      if (this.self) {
+        document.getElementById(65).style.transform = 'scale(1,1)';
+      }
+      reversed = 0;
+    }
+
     // update speed
     /*if (KEYS[40]) {
       vy += step;
@@ -284,7 +310,7 @@ module.exports = function Player() {
           lastFired = 1;
           console.log("BOOM");
           if (!shot)
-            shot= new Shot(x,y, direction);
+            shot= new Shot(x,y, direction, this);
           // TODO: immediatly sync to server, don't wait for 33ms tick
         }
         // else {
@@ -311,9 +337,9 @@ module.exports = function Player() {
 
     // find maze cell for collision check
     // initially checking Y collision, use smaller X
-    var cellXLeft = (x+vx+2) / world.cellSize|0,
+    var cellXLeft = Math.floor((x+vx+2) / world.cellSize), // using floor to handle negative
       cellXRight = (WIDTH-3+x+vx) / world.cellSize|0,
-      cellYTop = (y+vy) / world.cellSize|0,
+      cellYTop = Math.floor((y+vy) / world.cellSize),
       cellYBottom = (HEIGHT+y+vy) / world.cellSize|0;
 
 
@@ -336,9 +362,9 @@ module.exports = function Player() {
     }
 
     // checking X collision, use smaller Y
-    var cellXLeft = (x+vx) / world.cellSize|0,
+    var cellXLeft = Math.floor((x+vx) / world.cellSize), // using floor to handle negative
       cellXRight = (WIDTH+x+vx) / world.cellSize|0,
-      cellYTop = (y+vy+2) / world.cellSize|0,
+      cellYTop = Math.floor((y+vy+2) / world.cellSize),
       cellYBottom = (HEIGHT-1+y+vy-2) / world.cellSize|0;
 
     var wallSlide = 0;
@@ -368,17 +394,17 @@ module.exports = function Player() {
 
     // TODO: on wall animation
 
+    if (Math.abs(vx) > 1 || Math.abs(vy) > 1) {
+      notMoving = 0;
+    }
+    else {
+      notMoving += elapsed;
+    }
+
     if (this.self) {
-      if (Math.abs(vx) > 1 || Math.abs(vy) > 1) {
-        notMoving = 0;
-      }
-      else {
-        notMoving += elapsed;
         if (notMoving > 3) {
           camera.scale = Math.max(camera.scale - 0.004, 0.5);
         }
-        //console.log("scale "+camera.scale);
-      }
 
       if (!notMoving || this.btnA) {
         camera.scale = Math.min(camera.scale + 0.1, 1.7);
