@@ -246,7 +246,9 @@ client.connect({
     }
     // world.bulbsDict[gs.blue] = new Bulb(ofsToXY(gs.blue), world.cellSize);
     // world.bulbsDict[gs.red] = new Bulb(ofsToXY(gs.red), world.cellSize);
-
+    if (!gs.maze) {
+      return;
+    }
     world.maze = Maze(gs.mazeX, gs.mazeY, gs.maze, world.bulbsDict);
 
     world.intersections = {}

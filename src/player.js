@@ -30,6 +30,8 @@ module.exports = function Player() {
     notMoving = 0,
     lastFired= 0,
     shot=0,
+    disabled=0,
+
 
     totalElapsed=0,
     curAnim=0,
@@ -47,6 +49,7 @@ module.exports = function Player() {
   this.name = 'Player '+rng.int(100);
   this.bigShots=5;
   this.up = this.left = this.right = this.btnA = this.btnB = 0;
+  this._protected=0;
 
   this.getX = function() {
     return x;  // client, camera, main has no need for private data of player,
@@ -67,6 +70,8 @@ module.exports = function Player() {
       btnA:this.btnA, btnB:this.btnB,
       bigShots: this.bigShots,
       shot: shot? shot.serialize() : 0,
+      disabled: disabled,
+      protected: this._protected,
       up: this.up, left: this.left, right: this.right
     }
   };
@@ -84,6 +89,8 @@ module.exports = function Player() {
     if (undefined !== p.anim) setAnim(stickman.animations[p.anim]);
     if (undefined !== p.dir) direction = p.dir;
     if (undefined !== p.reversed) reversed = p.reversed;
+    if (undefined !== p.disabled) disabled = p.disabled;
+    if (undefined !== p.protected) this._protected = p.protected;
     if (undefined !== p.shot) {
       if (p.shot == 0) {
         shot = 0;
@@ -126,6 +133,12 @@ module.exports = function Player() {
     }
   };
 
+  this.shotDown = function(size) {
+    console.log(this.self+" shot down by shot of size "+size)
+    disabled = 2*size;
+    this._protected = disabled+2;
+  };
+
   this.draw= function(ctx,dt) {
     ctx.save()
 
@@ -133,6 +146,9 @@ module.exports = function Player() {
     // ctx.fillRect(0, 0, WIDTH, HEIGHT);
     // ctx.translate(WIDTH/2, HEIGHT);
     ctx.translate(x+WIDTH/2, y+HEIGHT);
+    if (disabled > 0) {
+      ctx.translate((Math.random()*6|0)-3,(Math.random()*6|0)-3);
+    }
     if (this.self) {
       ctx.fillStyle = '#ff0';
     }
@@ -462,6 +478,13 @@ module.exports = function Player() {
   }
 
   this.update= function(world, elapsed) {
+    if (this._protected > 0) {
+      this._protected -= elapsed;
+    }
+    if (disabled > 0) {
+      disabled -= elapsed;
+      return;
+    }
     if (this.btnB && reverseStack.length) {
       this.reverseMovement(world,elapsed);
     }
