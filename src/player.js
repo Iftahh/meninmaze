@@ -134,7 +134,7 @@ module.exports = function Player() {
   };
 
   this.shotDown = function(size) {
-    //console.log(this.self+" shot down by shot of size "+size)
+    // console.log(this.self+" shot down by shot of size "+size)
     disabled = 2*size;
     this._protected = disabled+2;
     if (this.self) {
@@ -151,6 +151,8 @@ module.exports = function Player() {
     ctx.translate(x+WIDTH/2, y+HEIGHT);
     if (disabled > 0) {
       ctx.translate((Math.random()*6|0)-3,(Math.random()*6|0)-3);
+      ctx.shadowColor = '#ffd';
+      ctx.shadowBlur = 20;
     }
     if (this.self) {
       ctx.fillStyle = '#ff0';

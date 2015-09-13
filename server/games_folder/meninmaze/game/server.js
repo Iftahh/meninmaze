@@ -289,7 +289,7 @@ function playerStarted(player,data) {
     .emit('state', { state: state, players: players });
 
   // repeat "game starting in X seconds, for 'repeat' times, then start the game"
-  var repeat = 3;//6 ;
+  var repeat = 4;
   var bulbsOfs = [];
 
   var repeater = function() {
@@ -461,6 +461,13 @@ io.on('connection', function(socket) {
   socket.on('update', function(d) { playerUpdate(player,d)});
   socket.on('bulbUpdate', bulbUpdate);
   socket.on('disconnect', onExit.bind(0,player));
+  socket.on('wallDestroyed', function(o) {
+    maze[o.ofs] = 1;
+    // log("wallDestroyed "+o.ofs);
+    io.to(id).emit('onWallDestroyed', {
+      wallDestroyed: o.ofs
+    });
+  });
 
   socket.emit('yourId', {id: player.id, color: color});
 

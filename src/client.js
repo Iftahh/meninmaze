@@ -35,6 +35,10 @@ function connect(cb, world) {
     gameState.playerId = data.id;
     cb.onId(data);
   });
+  socket.on('onWallDestroyed', function(o) {
+    //console.log("wall destroyed at "+o.wallDestroyed);
+    world.maze[o.wallDestroyed] = 1;
+  })
   player.emitPlayerInfo = function() {
     socket.emit('playerInfo', { name: player.name, color: player.color });
   }
@@ -153,6 +157,9 @@ module.exports = {
   startGame: startGame,
   connect: connect,
   gameState: gameState,
+  wallDestroyed: function(o) {
+    socket.emit('wallDestroyed', {ofs: o});
+  },
   updateBulb: function(b) {
     socket.emit('bulbUpdate', {ofs: b.ofs, color: b.color})
   }
