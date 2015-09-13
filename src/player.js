@@ -3,6 +3,14 @@ var rng = require('./rng');
 var StickMan = require('./stickman'),
   Shot = require('./shot'),
 
+  gravity= 0.5, // reduce speed Y every tick
+  maxSpeedX= 4,
+  maxSpeedY= 8,
+  jumpFromGround= 7.5, // boost up speed when jumping off ground
+  jumpFromAir= 0.1, // smaller gravity when pressing up even in air
+  chanceJumpWall= 0.3,  // chance to be able to jump from
+  wallFriction= 0.7,
+
   WIDTH=15, HEIGHT=25,
   BLUE=1, RED=2;
 
@@ -44,6 +52,7 @@ module.exports = function Player() {
     return {
       x: x, y:y, vx:vx, vy:vy,
       anim:curAnim.name, dir:direction,
+      reversed: reversed,
       up: this.up, left: this.left, right: this.right
     }
   };
@@ -102,9 +111,23 @@ module.exports = function Player() {
     ctx.fillText(this.name, 0,-HEIGHT-5);
 
 
+
+    if (reversed) {
+      // draw shadowwy before update
+      for (var i=1; i<4; i++) {
+        ctx.save()
+        ctx.globalAlpha=.9-i*.2;
+        ctx.translate(-vx*i/2,-vy*i/2);
+        ctx.scale(0.15, 0.15);
+        if (direction) {
+          ctx.scale(-1,1);
+        }
+        curAnim.render(ctx, stickman, totalElapsed, reversed);
+        ctx.restore();
+      }
+    }
+
     ctx.scale(0.15, 0.15);
-    ctx.lineWidth = 15;
-    ctx.lineJoin = 'bevel';
     if (direction) {
       ctx.scale(-1,1);
     }
@@ -126,8 +149,9 @@ module.exports = function Player() {
       ofs = maze.xyToOfs(cellX,cellY);
     if (!reversed) {
       reverseDirections = [];
+      reversed = 1;
     }
-    reversed = 1;
+
     // find offset of cell to move to:
     totalElapsed -= elapsed;
 
@@ -196,8 +220,8 @@ module.exports = function Player() {
 
     // follow the step we got from the reverse direction
     direction = dirToMove[0] > 0; // look left or right - opposite of normal move - move right and look to the left
-    vx = dirToMove[0]*1.2*world.maxSpeedX;
-    vy = dirToMove[1]*1.2*world.maxSpeedX; // on purpose using maxSpeedX - speedY is too fast, but must remain fast enough to jump and climb
+    vx = dirToMove[0]*1.2*maxSpeedX;
+    vy = dirToMove[1]*1.2*maxSpeedX; // on purpose using maxSpeedX - speedY is too fast, but must remain fast enough to jump and climb
     if (dirToMove[0]) {
       setAnim(run);
       y = world.cellSize*(ofs/maze.MAZE_X|0);
@@ -222,26 +246,26 @@ module.exports = function Player() {
     }
     else*/ if (this.up) {
       if (onGround) {
-        vy -= world.jumpFromGround;
+        vy -= jumpFromGround;
       }
       else {
-        vy -= world.jumpFromAir;
+        vy -= jumpFromAir;
       }
-      vy = Math.max(vy, -world.maxSpeedY);
+      vy = Math.max(vy, -maxSpeedY);
 
     }
-    vy += world.gravity;
-    vy = Math.min(vy, world.maxSpeedY);
+    vy += gravity;
+    vy = Math.min(vy, maxSpeedY);
 
     var groundAnim = run;
     if (this.right) {
       vx += step;
-      vx = Math.min(vx, world.maxSpeedX);
+      vx = Math.min(vx, maxSpeedX);
       direction = 0;
     }
     else if (this.left) {
       vx -= step;
-      vx = Math.max(vx, -world.maxSpeedX);
+      vx = Math.max(vx, -maxSpeedX);
       direction = 1;
     }
     else {
@@ -337,8 +361,8 @@ module.exports = function Player() {
     }
 
     if (wallSlide) {
-      vy *= world.wallFriction;
-      onGround = Math.random() < world.chanceJumpWall;  // small chance to be "onGround" and be able to jump
+      vy *= wallFriction;
+      onGround = Math.random() < chanceJumpWall;  // small chance to be "onGround" and be able to jump
       onWall = 1;
     }
 

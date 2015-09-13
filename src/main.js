@@ -53,16 +53,9 @@ howto.onclick = function() {
 var world = {
   cellSize: 32, //2*Math.min((canvas.width-20)/48, (canvas.height-20)/40);
   maze: {get: function(x,y) { return y > 1 ? 0:1}},
-  gravity: 0.5, // reduce speed Y every tick
-  maxSpeedX: 4,
-  maxSpeedY: 8,
-  jumpFromGround: 7.5, // boost up speed when jumping off ground
-  jumpFromAir: 0.1, // smaller gravity when pressing up even in air
-  chanceJumpWall: 0.3,  // chance to be able to jump from
-  wallFriction: 0.7,
   player:  new Player(),
   otherPlayers:{},
-  bulbsDict: {}
+  bulbsDict: {},
 }
 var player = world.player;
 player.self = 1;
@@ -77,6 +70,9 @@ window.onresize = function() {
   // for some reason the ctx resets on resize.. so redo
   ctx.font = 'italic 5pt Calibri';
   ctx.textAlign = 'center';
+  ctx.lineWidth = 15;
+  ctx.lineJoin = 'bevel';
+
   blue.onclick();
 }
 onresize();
@@ -96,7 +92,6 @@ function game(elapsed) {
     ctx.translate(halfWidth, halfHeight); // zoom to mid of screen
     ctx.scale(camera.scale,camera.scale);
     ctx.translate(-camera.X, -camera.Y); // translate camera
-
     world.maze.draw(ctx, world.cellSize);
     player.draw(ctx);
     for (var k in world.otherPlayers) {
