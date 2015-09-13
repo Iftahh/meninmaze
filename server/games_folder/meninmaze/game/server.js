@@ -45,8 +45,35 @@ function findPlayer(player) {
   }
 }
 
+function updatePlayers() {
+  var data = {
+    state:state,
+    players:players,
+    bulbs: bulbs
+  };
+  if (winTimestamp) {
+    var winIn = (winTimestamp - new Date()) / 1000 |0;
+    if (winIn != winInSec) {
+      winInSec = winIn;
+      var winMsg = winningTeam == 1 ? "<h2><span class='blue'>Blue</span> " : "<h2><span class='red'>Red</span> ";
+      if (winInSec == 0) {
+        winMsg +=  " TEAM WON!!!</h2>";
+        io.to(id).emit('news', {message: winMsg});
+        state = WAITING_FOR_GAME_START;
+        data.state = state;
+        data.endMsg = winMsg;
+        // log(winMsg);
+      }
+      else  {
+        io.to(id).emit('news', {message: winMsg+ "team winning in "+winInSec+' !</h2>'});
+      }
+    }
+  }
+  io.to(id).emit('state', data);
+}
+
 function playerStarted(player,data) {
-  log("Game starting!");
+  // log("Game starting!");
   state = GAME_STARTING;
   winTimestamp = 0;
 
@@ -78,30 +105,7 @@ function playerStarted(player,data) {
       // start updating the game state -
       setTimeout(function gameTick() {
         if (state != GAME_STARTED) return;
-        var data = {
-          state:state,
-          players:players,
-          bulbs: bulbs
-        };
-        if (winTimestamp) {
-          var winIn = (winTimestamp - new Date()) / 1000 |0;
-          if (winIn != winInSec) {
-            winInSec = winIn;
-            var winMsg = winningTeam == 1 ? "<h2><span class='blue'>Blue</span> " : "<h2><span class='red'>Red</span> ";
-            if (winInSec == 0) {
-              winMsg +=  " TEAM WON!!!</h2>";
-              io.to(id).emit('news', {message: winMsg});
-              state = WAITING_FOR_GAME_START;
-              data.state = state;
-              data.endMsg = winMsg;
-              log(winMsg);
-            }
-            else  {
-              io.to(id).emit('news', {message: winMsg+ "team winning in "+winInSec+' !</h2>'});
-            }
-          }
-        }
-        io.to(id).emit('state', data);
+        updatePlayers();
         setTimeout(gameTick, 33);
       }, 33);
 
@@ -116,7 +120,7 @@ function playerStarted(player,data) {
   // generate a maze with enough potential places for bulb lights
   var potentials = [];
   while (potentials.length < 11) {
-    log("Generating Maze");
+    // log("Generating Maze");
     maze = Maze(MAZE_X/2,MAZE_Y/2);
     potentials = maze.places.bottomDE.concat(maze.places.horizDE);
   }
@@ -153,6 +157,10 @@ function playerUpdate(player, data) {
   for (k in data) {
     player[k] = data[k];
   }
+  if (data.instant) {
+    log("instant update!");
+    updatePlayers();
+  }
 }
 
 function playerInfo(player,data) {
@@ -167,13 +175,13 @@ function playerInfo(player,data) {
   var found = findPlayer(player);
   if (!found) {
     players.push(player);
-    log('Player connected', { name: player.name });
+    // log('Player connected', { name: player.name });
     sockets[player.id].join(id);
     io.to(id).emit('news', { message: player.name+' joined the game', player: player });
   }
-  else {
-    log('Player updated', data);
-  }
+  // else {
+  //   log('Player updated', data);
+  // }
 
   io.to(id)
     .emit('state', { state: state, players: players });
@@ -181,7 +189,7 @@ function playerInfo(player,data) {
 }
 
 function onExit(player) {
-  log('Player exit', { name: player.name, color: player.color });
+  // log('Player exit', { name: player.name, color: player.color });
   var found = findPlayer(player);
   if (found) {
     players.splice(players.indexOf(found),1);
@@ -190,7 +198,7 @@ function onExit(player) {
     var msg = '';
     if (players.length < 2) {
       msg = player.name+' left the game,<br> not enough players remained -<br> THE END';
-      log(msg);
+      // log(msg);
       state = WAITING_FOR_GAME_START;
       io.to(id)
         .emit('state', { state: state, players: players, endMsg:msg });
@@ -201,7 +209,7 @@ function onExit(player) {
 }
 
 function bulbUpdate(d) {
-  log("bulb "+d.ofs+" updated to "+d.color);
+  // log("bulb "+d.ofs+" updated to "+d.color);
   bulbs[d.ofs] = d.color;
   var counts=[0,0,0];
   for (var b in bulbs) {
@@ -233,7 +241,7 @@ function bulbUpdate(d) {
 
 var color = 1;
 io.on('connection', function(socket) {
-  log('New connection', socket.id);
+  // log('New connection', socket.id);
 
   color = 3-color; // toggle 1,2
   var player = {

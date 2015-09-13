@@ -63,6 +63,14 @@ var world = {
 var player = world.player;
 player.self = 1;
 
+// DBG
+window.moveToOtherPlayer = function() {
+  for (var k in world.otherPlayers) {
+    xy = world.otherPlayers[k].serialize();
+    player.deserialize({x:xy.x, y:xy.y});
+    break;
+  }
+}
 
 var width, height, halfWidth, halfHeight;
 window.onresize = function() {

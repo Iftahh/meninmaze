@@ -38,6 +38,7 @@ function connect(cb, world) {
   player.emitPlayerInfo = function() {
     socket.emit('playerInfo', { name: player.name, color: player.color });
   }
+  player.emitShotInfo = updatePlayer;
   player.emitPlayerInfo();
   //setTimeout(tic, 10);
 }
@@ -60,6 +61,14 @@ function onNews(data) {
 }
 
 var endGameMsg = 'The server connection dropped.';
+
+function updatePlayer(instant) { // instant to tell server to not delay other players update of this message
+  socket.emit('update', {
+    id: gameState.playerId,
+    player: player.serialize(),
+    intant: instant
+  });
+}
 
 function onGameState(data) {
   var wasJoin = gameState.state == 3;
@@ -101,7 +110,15 @@ function onGameState(data) {
         callbacks.onStart();
         // console.log("Game started ",data);
         started = 1;
-        updateInt = setInterval(updateTick, 33);
+        updateInt = setInterval(function(){
+          // Submit mouse position only each 33ms if it was changed.
+          if (gameState.state != 2) {
+            clearInterval(updateInt);
+            updateInt = 0;
+            return;
+          }
+          updatePlayer();
+        }, 33);
       }
       break;
 

@@ -48,6 +48,17 @@ module.exports = function Player() {
   this.bigShots=5;
   this.up = this.left = this.right = this.btnA = this.btnB = 0;
 
+  this.getX = function() {
+    return x;  // client, camera, main has no need for private data of player,
+              // but Shot does need the X of the players...
+              // should have been Player using Shot info... oh well, will refactor later
+
+  }
+
+  this.getDirection = function() {
+    return direction; // again ugly Shot using private data... will be fixed after contest
+  }
+
   this.serialize= function() {
     return {
       x: x, y:y, vx:vx, vy:vy,
@@ -82,6 +93,7 @@ module.exports = function Player() {
           shot = new Shot(p.shot.x, p.shot.y, p.shot.direction, this);
         }
         shot.totalElapsed = p.shot.totalElapsed;
+        shot.x1 = p.shot.x1;
       }
     }
     if (undefined !== p.up) up=p.up;
@@ -90,8 +102,10 @@ module.exports = function Player() {
   };
 
   this.isCollide = function(left, top, width, height) {
-    return (Math.abs(left - x) * 2 < (width + WIDTH)) &&
-         (Math.abs(top - y) * 2 < (height + HEIGHT));
+    return !(left > x+WIDTH
+       || left+width < x
+       || top > y+HEIGHT
+       || top+height < y)
   }
 
   this.setColor= function(col) {
@@ -303,31 +317,37 @@ module.exports = function Player() {
     }
 
     if (onGround && !onWall) {
-      if (notMoving && this.btnA) {
-        notMoving = 0.1; // don't allow zoom out while firing
-        setAnim(stickman.animations.fire);
-        if (!lastFired) {
-          lastFired = 1;
-          console.log("BOOM");
-          if (!shot)
-            shot= new Shot(x,y, direction, this);
-          // TODO: immediatly sync to server, don't wait for 33ms tick
+      //if (this.self) {
+        if (notMoving && this.btnA) {
+          notMoving = 0.1; // don't allow zoom out while firing
+          groundAnim = stickman.animations.fire;
+          if (!lastFired) {
+            lastFired = 1;
+            console.log("BOOM");
+            if (!shot) {
+              shot = new Shot(x,y, direction, this);
+              // immediatly sync to server, don't wait for 33ms tick, to lessen delay to other players
+              if (this.emitShotInfo) {
+                this.emitShotInfo();
+              }
+            }
+          }
+          // else {
+          //   lastFired += elapsed;
+          //   console.log("already fired");
+          //   if (lastFired > 2 && !shot) {
+          //     shot = new Shot(x,y,direction, 4);
+          //     lastFired = 0;
+          //   }
+          // }
         }
-        // else {
-        //   lastFired += elapsed;
-        //   console.log("already fired");
-        //   if (lastFired > 2 && !shot) {
-        //     shot = new Shot(x,y,direction, 4);
-        //     lastFired = 0;
-        //   }
-        // }
-      }
-      else {
-        shot = lastFired = 0;
+        else {
+          shot = lastFired = 0;
+        }
+    //  }
 
-        // walk, run, brakes, stand,  these should be set only if on ground and not sliding on wall
-        setAnim(groundAnim);
-      }
+      // walk, run, brakes, stand,  these should be set only if on ground and not sliding on wall
+      setAnim(groundAnim);
     }
     else {
       shot = lastFired = 0;
