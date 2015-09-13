@@ -321,6 +321,6 @@ ParticlePointEmitter = function(maxParticles, options) {
 }
 
 module.exports = {
-  ParticlePointEmitter: ParticlePointEmitter,
+  ParticlePointEmitter: ParticlePointEmitter
 
 }

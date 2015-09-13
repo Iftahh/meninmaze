@@ -4,13 +4,15 @@ var utils = require('./utils');
 var KEYS={}, world;
 
 var updateFromKeys = function(e, realEv) {
-  var code= e.keyCode;
+  var code= e.keyCode, was=KEYS[code];
     KEYS[code]=  e.type == 'keydown';
     //console.log('code is ',code);
     var element = document.getElementById(code);
     if (element) {
       if (KEYS[code]) {
         element.classList.add('clicked');
+        if (!was)
+          navigator.vibrate(10);
       }
       else {
         element.classList.remove('clicked');

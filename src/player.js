@@ -137,6 +137,9 @@ module.exports = function Player() {
     //console.log(this.self+" shot down by shot of size "+size)
     disabled = 2*size;
     this._protected = disabled+2;
+    if (this.self) {
+      navigator.vibrate(20*size);
+    }
   };
 
   this.draw= function(ctx,dt) {

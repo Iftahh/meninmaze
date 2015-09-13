@@ -21,7 +21,9 @@ var input = require('./input');
 var totalElapsed = 0;
 
 
-
+if (!navigator.vibrate) {
+  navigator.vibrate = function() {}
+}
 
 blue.onclick = red.onclick = function() {
   if (client.gameState.state) { return;  }

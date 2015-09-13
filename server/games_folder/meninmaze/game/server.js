@@ -1,7 +1,7 @@
 'use strict';
 
 var io = require('sandbox-io');
-
+(function() {
 function isEmpty(obj) {
   for(var i in obj) { return false; }
   return true;
@@ -477,3 +477,4 @@ io.on('connection', function(socket) {
     socket.emit('state', { state: state, players: players });
   }
 });
+})();
